@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.guest.mapper.GuestMapperRN">
+
+<select id="selectMemberCoupon" resultType="map">
+	select *
+	from so_coupon sc , so_allotcoupon sa 
+	where sc.coupon_no = sa.coupon_no 
+	and sa.member_no = #{member_no}
+	and sa.allot_useOrUnuse = 'N'
+	<![CDATA[
+	and TIMESTAMPDIFF(minute, now(), sc.coupon_useDate) > 0
+	]]>	
+</select>
+
+<update id="useCoupon">
+	update so_allotcoupon set allot_useOrUnuse = 'Y' where allot_no = #{allot_no};
+</update>
+
+<select id="selectOrderByOrderNo" resultType="com.teamb.shareoffice.vo.OrderVo">
+	select *
+	from so_order
+	where order_no = #{order_no}
+</select>
+
+<select id="selectBusinessDayPrice" resultType="int">
+	select business_day_price 
+	from so_businessday
+	where business_day = #{business_day}
+	and office_no = #{office_no}
+</select> 
+
+</mapper>

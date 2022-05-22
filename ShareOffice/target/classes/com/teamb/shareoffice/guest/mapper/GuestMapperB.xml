@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.guest.mapper.GuestMapperB">
+
+	
+	<select id="getOfficeInfoByOfficeNo" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+		select *
+		from SO_OfficeInfo
+		where office_no = #{office_no}
+	</select>
+	
+	<select id="getBusinessDayInfoByOfficeNo" resultType="com.teamb.shareoffice.vo.BusinessDayVo">
+		select * 
+		from SO_BusinessDay
+		where office_no = #{office_no}
+	</select>
+	
+	<!-- order, rental 관련 -->
+	<insert id="guestOrder">
+		<selectKey resultType="int" keyProperty="order_no" order="AFTER">
+       	 SELECT MAX(order_no) FROM so_order        
+    	</selectKey> 
+		insert into so_order(
+			office_no, 
+			member_no, 
+			order_personnel, 
+			order_refuse_check, 
+			order_refuse_comment, 
+			order_date,
+			order_tid)
+		values(
+			#{office_no}, 
+			#{member_no}, 
+			#{order_personnel}, 
+			'N', 
+			'', 
+			NOW(),
+			#{order_tid} )
+	</insert>
+	
+	<insert id="officeRental">
+		insert into so_rental(
+			order_no, 
+			rental_date, 
+			rental_price,
+			rental_status)
+		values(
+			#{order_no}, 
+			#{rental_date}, 
+			#{rental_price},
+			'P' )
+	</insert>
+	
+	<select id="officeRentalWhetherCheck" resultType="int">
+		select count(*)
+		from so_rental sr
+		where sr.order_no in (select so.order_no 
+						      from so_order so
+						      where so.office_no = #{office_no}) 
+					      and sr.rental_date = #{rental_date}
+					      and sr.rental_status in ('U', 'P')
+	</select>
+	
+	<!-- 캘린더관련 -->
+	<select id="getRentalListByOfficeNo" resultType="com.teamb.shareoffice.vo.RentalVo">
+		select sr.* from so_rental sr 
+		where sr.order_no in (
+			select so.order_no from so_order so 
+			where so.office_no = #{office_no}
+		)		
+	</select>
+	<!--          -->
+	
+	
+	<select id="getPriceAndBusinessTimeByDay" resultType="com.teamb.shareoffice.vo.BusinessDayVo">
+		select *
+		from SO_BusinessDay
+		where office_no = #{office_no} and business_day = #{business_day}
+	</select>
+	
+	<!-- 예약 현황페이지 관련 -->
+	<select id="getOrderListByMemberNo" resultType="com.teamb.shareoffice.vo.OrderVo">
+		select *
+		from so_order
+		where member_no = #{member_no}
+		order by order_no desc
+	</select>
+	
+	<select id="getRentalListByOrderNo" resultType="com.teamb.shareoffice.vo.RentalVo">
+		select *
+		from so_rental
+		where order_no = #{order_no}
+	</select>
+	
+	
+	 <!-- 리뷰작성 -->
+	 <insert id="writeReview">
+	 	insert into so_review (
+	 		order_no, 
+	 		review_title, 
+	 		review_content, 
+	 		review_rating, 
+	 		review_image,
+	 		review_date)
+		values(
+			#{order_no}, 
+			#{review_title}, 
+			#{review_content}, 
+			#{review_rating}, 
+			#{review_image},
+			NOW() )
+	 </insert>
+	
+  	 <select id="reviewExistCheck" resultType="int">
+  	 	select count(*)
+		from so_review
+		where order_no = #{order_no}
+  	 </select>
+  	 
+  	 <!-- 리뷰 예외처리 관련 (오피스 예약후 이용완료시 리뷰 작성 가능) -->
+  	 
+  	 <select id="getRentalCount" resultType="int">
+  	 	select count(*)
+		from so_rental
+		where order_no = #{order_no}
+  	 </select>
+  	 
+  	 <select id="getRentalUseCount" resultType="int">
+  	 	select count(*)
+		from so_rental
+		where order_no = #{order_no} and rental_status in ('U');
+  	 </select>
+  	 
+  	 <select id="getRentalUseAndCancelCount" resultType="int">
+  	 	select count(*)
+		from so_rental
+		where order_no = #{order_no} and rental_status in ('U', 'C')
+  	 </select>
+
+
+
+
+
+</mapper>

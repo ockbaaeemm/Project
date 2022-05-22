@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.member.mapper.MemberMapperRN">
+<select id="selectMemberById" resultType="com.teamb.shareoffice.vo.MemberVo">
+	select * 
+	from so_member
+	where member_id = #{member_id}
+</select>
+
+<insert id="insertMember">
+	INSERT INTO SO_Member
+	(member_id, member_nick, member_gender, member_birth,
+	member_phone, member_email, member_joindate, member_type)values(
+		#{member_id},
+		#{member_nick},
+		#{member_gender},
+		#{member_birth},
+		#{member_phone},
+		#{member_email},
+		NOW(),
+		'G'
+	)
+</insert>
+
+<select id="selectMemberByNo" resultType="com.teamb.shareoffice.vo.MemberVo">
+	select *
+	from so_member
+	where member_no = #{member_no}
+</select>
+
+</mapper>

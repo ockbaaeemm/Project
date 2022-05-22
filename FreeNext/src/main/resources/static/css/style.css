@@ -1,0 +1,38 @@
+@charset "UTF-8";
+
+.center{
+	height:38px;
+	line-height:38px;
+	text-align:center;
+	}
+	
+.bottom{
+	vertical-align: bottom;
+}	
+
+.left{
+	text-align: left;
+}
+
+.right{
+	text-align: right;
+}
+	
+.price{
+	color: #DCDCDC;
+	text-decoration:line-through;
+}
+
+.grayColor{
+	color: #808080;
+}
+
+.hr2px{
+	height: 2px;
+}
+
+.defaultBorder {border: 1px solid #868e96;}
+
+.fright {float: right;}
+
+.cursor {cursor:pointer;}

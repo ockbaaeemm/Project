@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link th:href="@{/css/commons.css}" rel="stylesheet">
+    
+    <script>
+    	function href(){
+    		window.location.href = 'http://localhost:8181/member/bizLoginPage'
+    	}
+    </script>
+</head>
+<body>
+<div style="margin:0 auto;">
+  <div class="container-fluid">
+    <th:block th:include="commons/biz_navbar"></th:block>
+
+		    <div class="row">
+		        <div class="col">
+		            <!-- 여기에 작성해주세요-->
+		            
+					<div class="row">
+						<div class="col"></div>
+						<div class="col-6 text-center">
+							<div class="row"><h1>회원가입이 완료 되었습니다</h1></div>
+							<hr>
+							<div class="row">
+							<div class="col " th:text="${MemberVo.member_name}"></div>
+							<p >님 가입을 환영합니다</p>
+							<hr>
+							<div class="col">가입하신 아이디는</div>
+							<div class="col" th:text="${MemberVo.member_id}"></div>
+							<div class="col">입니다.</div>
+							</div>
+							<hr>
+							<button type="button" onclick="href()">로그인 페이지로</button>
+						</div>
+						<div class="col"></div>
+					
+					</div>
+				
+			
+            
+        </div>
+    </div>
+
+
+    <th:block th:include="commons/footer"></th:block>
+  </div> 
+</div>  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script th:inline="javascript">
+
+	/*<![CDATA[*/
+	var referer = /*[[ ${referer} ]]*/;
+	/*]]*/
+
+	alert("[로그인 실패] 아이디 혹은 비밀번호를 확인해주세요.");
+	if(referer == 'normal') {
+		document.location.href="../member/loginPage";	
+	} else if(referer == 'biz') {
+		document.location.href="../member/bizLoginPage";
+	}
+	
+</script>
+</head>
+<body>
+
+</body>
+</html>

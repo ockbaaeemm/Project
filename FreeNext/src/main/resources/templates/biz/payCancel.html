@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<script>
+	window.close();
+	
+	window.addEventListener('unload', function() {
+		window.opener.sendMeData("결제 취소");
+	});
+</script>
+</head>
+<body>
+</body>
+</html>

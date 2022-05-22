@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.guest.mapper.GuestMapper_H">
+
+<!--등록승인된 오피스 최신순 리스트  -->
+<select id="getLatestOfficeList" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+select *
+from SO_OfficeInfo 
+where office_approve = 'Y'
+order by office_approve_date DESC
+</select>
+<!--지도에 오피스 위치 전체 출력-->
+<select id="getLocationList" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+select * from SO_OfficeInfo
+where office_address like CONCAT('%',#{searchKeyword},'%')
+and office_approve = 'Y'
+</select>
+
+<!-- 오피스 상세보기 페이지 -->
+<select id="getOfficeByNo" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+select * from SO_OfficeInfo
+where office_no = #{office_no}
+</select>
+<!-- 오피스 최소금액 출력 -->
+<select id="getOfficeMinPrice" resultType="int">
+select MIN(business_day_price) 
+from SO_BusinessDay
+where office_no=#{office_no}
+</select>
+
+
+<!-- 운영시간,가격 정보 가져오기 -->
+<select id="getBusinessDayPriceByNo" resultType="com.teamb.shareoffice.vo.BusinessDayVo">
+select * from SO_BusinessDay
+where office_no=#{office_no}
+</select>
+
+<!-- 이미지 디테일 정보 가져오기 -->
+<select id="getImageDetailByNo" resultType="com.teamb.shareoffice.vo.ImageDetailVo">
+select * from SO_ImageDetail
+where office_no=#{office_no}
+</select>
+
+<!-- 이미지 총 갯수 가져오기 -->
+<select id="getImageCount" resultType="int">
+select count(*)from SO_ImageDetail where office_no=#{office_no}
+</select>
+
+<!-- 편의시설 가져오기 -->
+<select id="getFacilityByNo" resultType="com.teamb.shareoffice.vo.FacilityCategoryVo">
+select cate.* 
+from SO_FacilityCategory as cate, SO_OfficeFacility as offi
+where cate.facility_no = offi.facility_no and offi.office_no=#{office_no}
+</select>
+
+
+
+
+<!-- 리뷰 전체 리스트 -->
+<select id="getReviewListByNo" resultType="com.teamb.shareoffice.vo.ReviewVo">
+select sr.* from so_review sr , so_order so 
+where sr.order_no = so.order_no 
+and so.office_no = #{office_no}
+order by sr.review_no desc
+</select>
+
+<!-- 리뷰 3개만 출력 -->
+<select id="getReviewListOnlyThree" resultType="com.teamb.shareoffice.vo.ReviewVo">
+select sr.* from so_review sr , so_order so 
+where sr.order_no = so.order_no 
+and so.office_no = #{office_no}
+order by sr.review_no desc 
+limit 3
+</select>
+
+<!-- 리뷰 상세보기 -->
+<select id="getReviewByReviewNo" resultType="com.teamb.shareoffice.vo.ReviewVo">
+select *from so_review
+where review_no =#{review_no}
+</select>
+<select id="getMemberNickByOrderNo" resultType="com.teamb.shareoffice.vo.MemberVo">
+select sm.member_nick 
+from SO_Order sor, so_member sm 
+where sor.member_no = sm.member_no and order_no=#{order_no}
+</select>
+
+<!-- 리뷰 평점 구하기 -->
+<select id="getAvgRating" resultType="Double">
+select ROUND(AVG(sr.review_rating),1 ) from so_review sr, so_order so 
+where sr.order_no = so.order_no 
+and so.office_no = #{office_no}
+</select>
+
+<!-- 오피스별 리뷰 갯수 구하기 -->
+<select id="getReviewCountByNo" resultType="int">
+select count(*)  from so_review sr , so_order so 
+where sr.order_no = so.order_no 
+and so.office_no = #{office_no}
+</select>
+
+<!-- 호스트 신청 페이지 -->
+<insert id="insertApplyHostInfo">
+insert into SO_Host( member_no, host_owner, host_name,host_license_number,
+host_license_img, host_apply_date, host_approve) 
+values (
+#{member_no},
+#{host_owner},
+#{host_name},
+#{host_license_number},
+#{host_license_img},
+NOW(),
+'P'
+
+)
+</insert>
+
+
+
+<!-- 호스트 신청 현황 리스트 출력 -->
+<select id="getHostApproveCheck" resultType="com.teamb.shareoffice.vo.HostVo">
+select *from SO_Host 
+where member_no=#{member_no}
+order by host_no desc
+</select>
+
+
+
+
+
+
+
+
+</mapper>

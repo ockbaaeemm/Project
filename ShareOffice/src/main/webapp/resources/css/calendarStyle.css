@@ -1,0 +1,19 @@
+@charset "UTF-8";
+
+.impossible-reg{
+   	background-color: #e7e7e7; opacity: 0.5;
+}
+
+.reserved-reg{
+    /*background-color: #ff9b9bad;*/
+    background-color: #e7e7e7; opacity: 0.5;
+}
+
+.choose-reg{
+    background-color: rgba(166, 138, 100, 0.5 );
+}
+
+.impossible-reg-icon{
+	color: #e7e7e7; 
+	opacity: 0.7;
+}

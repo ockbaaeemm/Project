@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.teamb.freenext.scraping.mapper.ScrapingMapper">
+
+<select id="selectStartKey" resultType="string">
+	select project_key from FN_ProjectBoard
+	where cooperation_no = #{cooperation_no}
+	<![CDATA[ 
+	and TIMESTAMPDIFF(hour, project_date, now()) <= 168
+	]]>	
+	order by project_no
+	limit 1	
+</select>
+
+<select id="selectEndKeyElancer" resultType="string">
+	select project_key
+	from fn_projectboard pb, fn_project_job pj
+	where pb.project_no = pj.project_no
+	and pb.cooperation_no = 2
+	and pj.job_no = #{job_no}
+	<![CDATA[	
+	and TIMESTAMPDIFF(hour, project_date, now()) <= 168
+	]]>		
+	order by pb.project_no asc
+	limit 5
+</select>
+
+<select id="selectEndKeyWishket" resultType="string">
+	select project_key
+	from fn_projectboard
+	where cooperation_no = 4
+	<![CDATA[	
+	and TIMESTAMPDIFF(hour, project_date, now()) <= 168
+	]]>		
+	order by project_no asc
+	limit 5
+</select>
+
+
+<select id="selectProjectJobByProjectNo" resultType="com.teamb.freenext.vo.ProjectJobVo">
+	select * from FN_Project_Job
+	where project_no = #{project_no}
+</select>
+
+<select id="selectProjectLocalByProjectNo" resultType="com.teamb.freenext.vo.ProjectLocalVo">
+	select * from FN_Project_Local
+	where project_no = #{project_no}
+</select>
+
+<select id="insertOrUpdate" statementType="CALLABLE" parameterType="HashMap">
+{ CALL INSERT_OR_UPDATE(
+	#{in_project_no},
+	#{in_member_no},
+	#{in_workType_no},
+	#{in_recruitType_no},
+	#{in_cooperation_no},
+	#{in_project_name},
+	#{in_project_period},
+	#{in_project_price},
+	#{in_project_state},
+	#{in_project_content},
+	#{in_project_url},
+	#{in_project_date},
+	#{in_project_key},
+	#{in_job_no},
+	#{in_local_no}	
+)}
+</select>
+
+<select id="selectKakaoKey" resultType="string">
+	select kakao_key
+	from kakao
+	where kakao_no = 1
+</select>
+
+
+</mapper>

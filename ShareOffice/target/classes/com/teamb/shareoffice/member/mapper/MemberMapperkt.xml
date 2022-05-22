@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.member.mapper.MemberMapperkt">
+	
+	<select id="getMemberByNo" resultType="com.teamb.shareoffice.vo.MemberVo">
+		SELECT * FROM SO_MEMBER WHERE member_no = #{member_no}
+	</select>
+
+
+	<select id="test" resultType="map">
+	select * from test
+	
+	</select>
+
+
+
+
+</mapper>

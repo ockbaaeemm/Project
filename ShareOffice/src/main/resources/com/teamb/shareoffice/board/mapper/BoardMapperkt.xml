@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.board.mapper.BoardMapperkt">
+	
+	<select id="getFreeBoardList" resultType="com.teamb.shareoffice.vo.FreeBoardVo">
+		SELECT * 
+		FROM SO_FreeBoard 
+		ORDER BY freeboard_no DESC
+		limit #{pageNum}, 10		
+	</select>
+	
+	<insert id="insertFreeBoard">
+		INSERT INTO SO_FreeBoard
+		(member_no, freeboard_title, freeboard_content, freeboard_readCount, freeboard_writeDate)
+		VALUES
+		(
+		#{member_no},
+		#{freeboard_title},
+		#{freeboard_content},
+		#{freeboard_readCount},
+		NOW()
+		)
+	</insert>
+	
+	<select id="readFreeBoardRow" resultType="com.teamb.shareoffice.vo.FreeBoardVo">
+		SELECT * 
+		FROM SO_FreeBoard 
+		WHERE freeboard_no = #{freeboard_no}
+	</select>
+	
+	<update id="increaseFreeBoardReadCount">
+		UPDATE SO_FreeBoard 
+		SET freeboard_readCount = freeboard_readCount + 1
+		WHERE freeboard_no = #{freeboard_no}
+	</update>
+
+	<delete id="deleteFreeBoardRow">
+		DELETE 
+		FROM SO_FreeBoard 
+		WHERE freeboard_no = #{freeboard_no}
+	</delete>
+	
+	<update id="fixFreeBoardRow">
+		UPDATE SO_FreeBoard 
+		SET freeboard_title = #{freeboard_title}, 
+		freeboard_content = #{freeboard_content}
+		WHERE freeboard_no = #{freeboard_no}
+	</update>
+	
+	<insert id="insertFreeBoardComment">
+		INSERT INTO SO_FreeBoardComment
+		(freeboard_no, member_no, comment_content, comment_writeDate)
+		VALUES
+		(
+		#{freeboard_no},
+		#{member_no},
+		#{comment_content},
+		NOW()
+		)
+	</insert>
+	<select id="getFreeBoardCommentList" resultType="com.teamb.shareoffice.vo.FreeBoardCommentVo">
+		SELECT *
+		FROM SO_FreeBoardComment
+		WHERE freeboard_no = #{freeboard_no}
+		ORDER BY comment_no DESC
+	</select>
+	
+	<select id="getFreeBoardCount" resultType="int">
+		SELECT COUNT(*) FROM SO_FreeBoard
+	</select>
+	
+	<!-- QnA 게시판 목록 가져옴 --> 	 
+	<select id="getQnAList" resultType="com.teamb.shareoffice.vo.QnAVo">
+		SELECT * 
+		FROM SO_QnA
+		ORDER BY qna_no DESC
+		limit #{pageNum}, 10	
+	</select>
+	
+	<select id="getQnACount" resultType="int">
+		SELECT COUNT(*) FROM SO_QnA
+	</select>
+		
+	<!-- QnA게시판 글쓰기 -->
+	<insert id="insertQnAWrite">
+		INSERT INTO SO_QnA
+		(member_no, qna_title, qna_content, qna_screct, qna_writeDate)
+		VALUES(
+		#{member_no},
+		#{qna_title},
+		#{qna_content},
+		#{qna_screct},
+		NOW()
+		)
+	</insert>
+	<!-- 댓글 달기 쿼리인데 member_no가 필요없어졌다 ;;;;;; -->
+	<insert id="insertQnAAnswer">
+		INSERT INTO SO_QnAAnswer
+		(admin_no, qna_no, member_no, answer_content, answer_writeDate)
+		values(
+		#{admin_no},
+		#{qna_no},
+		0,
+		#{answer_content},
+		NOW()
+		)
+	</insert>
+	<!-- 댓글(답글) 가져오는 쿼리 -->
+	<select id="getQnAAnswerList" resultType="com.teamb.shareoffice.vo.QnAAnswerVo">
+		SELECT * FROM SO_QnAAnswer
+		WHERE qna_no = #{qna_no}
+		ORDER BY answer_no
+	</select>
+	<!-- 중복인데 ?????? --> 	 
+	<select id="getQnABoardRow" resultType="com.teamb.shareoffice.vo.QnAVo">
+		SELECT * FROM SO_QnA
+		WHERE qna_no = #{qna_no}
+	</select>
+	<!-- QnA게시글 한행 불러오기 (상세글보기용)-->
+	<select id="readQnABoardRow" resultType="com.teamb.shareoffice.vo.QnAVo">
+		SELECT * FROM SO_QnA
+		WHERE qna_no = #{qna_no}
+	</select>
+	<!-- QnA게시글 삭제 --> 	 
+	<delete id="deleteQnABoardRow">
+		DELETE 
+		FROM SO_QnA 
+		WHERE qna_no = #{qna_no}
+	</delete>
+	<!-- QnA게시글 fix -->
+	<update id="fixQnABoardRow">
+		UPDATE SO_QnA 
+		SET	qna_title= #{qna_title}, 
+		qna_content = #{qna_content}
+		WHERE qna_no = #{qna_no}
+	</update> 	 
+	<!-- 특정글에 코멘트가 있는가 없는가 -->
+	<select id="getCheckedQnAComment" resultType="int">
+		SELECT count(*) FROM SO_QnAAnswer
+		WHERE qna_no = #{qna_no}
+	</select>
+	<!-- 게시글 추천(좋아요)  -->	
+	<insert id="insertQnALike">
+		INSERT INTO SO_QnALike
+		(member_no, qna_no, like_date)
+		VALUES(
+			#{member_no},
+			#{qna_no},
+			NOW()
+		)		
+	</insert>
+	<!-- 추천(좋아요) 취소 -->
+	<delete id="deleteQnALike">
+		DELETE 
+		FROM SO_QnALike
+		WHERE member_no = #{member_no} 
+		AND qna_no = #{qna_no}
+	</delete>	
+	
+	<select id="getTotalCountLike" resultType="int">
+		SELECT COUNT(*) 
+		FROM SO_QnALike
+		WHERE qna_no = #{qna_no}
+	</select>
+	
+	<select id="getMyCountLike" resultType="int">
+		SELECT COUNT(*) 
+		FROM SO_QnALike
+		WHERE qna_no = #{qna_no} 
+		AND member_no = #{member_no}
+	</select>
+	
+	<select id="getQnALimitNo" resultType="int">
+		SELECT t1.qna_no
+		FROM (
+		SELECT count(*) AS cnt, a.qna_no 
+		FROM SO_QnALike a, SO_QnA b  
+		WHERE a.qna_no = b.qna_no
+		GROUP BY a.qna_no)
+		t1
+		ORDER BY t1.cnt DESC
+		LIMIT 3
+	</select>
+	<select id="getHotQnA" resultType="com.teamb.shareoffice.vo.QnAVo">
+		SELECT * 
+		FROM SO_QnA
+		WHERE qna_no = #{qna_no} 
+	</select>
+	<!-- 쿠폰 생성 -->
+	<insert id="insertCoupon">
+		INSERT INTO SO_Coupon
+		(coupon_name, admin_no, coupon_discount, coupon_count, coupon_image, coupon_useDate, coupon_date)
+		VALUES(
+		#{coupon_name},
+		#{admin_no},
+		#{coupon_discount},
+		#{coupon_count},
+		#{coupon_image},
+		#{coupon_useDate},
+		NOW()
+		)
+	</insert>
+	<select id="getCouponList" resultType="com.teamb.shareoffice.vo.CouponVo">
+		SELECT * 
+		FROM SO_Coupon
+		ORDER BY coupon_no DESC
+	</select>
+
+	<!-- 소비된 쿠폰 -->
+	<select id="consumptionCoupon" resultType="int">
+		SELECT COUNT(coupon_no) FROM SO_AllotCoupon
+		WHERE coupon_no = #{coupon_no};
+		
+		
+	</select>
+	
+	<insert id="insertAllotCoupon">
+		INSERT INTO SO_AllotCoupon
+		(member_no, coupon_no, allot_date, allot_useOrUnuse)
+		VALUES(
+		#{member_no},
+		#{coupon_no},
+		NOW(),
+		'N'
+		)
+	</insert>
+	
+	<select id="memberReserveCoupon" resultType="com.teamb.shareoffice.vo.AllotCouponVo">
+		SELECT * 
+		FROM SO_AllotCoupon 
+		WHERE member_no = #{member_no}
+	</select>
+	
+	<select id="memberReserveCoupon2" resultType="int">
+		SELECT COUNT(*) 
+		FROM so_allotcoupon
+		WHERE member_no = #{member_no}
+		AND coupon_no = #{coupon_no}		
+	</select>
+	
+	<select id="getMyCoupon" resultType="map">
+		SELECT *
+		FROM SO_Coupon c, SO_AllotCoupon a 
+		WHERE c.coupon_no = a.coupon_no 
+		AND member_no = #{member_no}
+		ORDER BY c.coupon_date DESC
+	</select>
+	 
+	
+	
+</mapper>

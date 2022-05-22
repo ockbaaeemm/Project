@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.host.mapper.HostMapper">
+
+<!-- 오피스 등록  -->
+	<insert id="insertOffice">
+		<selectKey resultType="int" keyProperty="office_no" order="AFTER">
+       	 SELECT MAX(office_no) FROM so_officeInfo        
+    	</selectKey>   
+		INSERT INTO SO_OfficeInfo
+		(member_no, office_name, office_simpleContent, office_detailContent, office_personnel, office_tags, office_address,
+		office_address_detail, office_managerPhone, office_changedPhone, office_thumbnail, office_min_booking_day, office_approve, office_approve_comment,
+		office_approve_date) VALUES(
+			#{member_no},
+			#{office_name}, 
+			#{office_simpleContent}, 
+			#{office_detailContent}, 
+			#{office_personnel}, 
+			#{office_tags}, 
+			#{office_address}, 
+			#{office_address_detail}, 
+			#{office_managerPhone}, 
+			#{office_changedPhone}, 
+			#{office_thumbnail}, 
+			#{office_min_booking_day}, 
+			'P', 
+			NULL, 
+			NULL )	
+	</insert>
+	
+	<select id="getLastOfficeInfoPK" resultType="int">
+		SELECT MAX(office_no) FROM SO_OfficeInfo
+	</select>
+	
+<!-- 편의시설 카테고리 -->
+	<select id="getFacilityCategoryList" resultType="com.teamb.shareoffice.vo.FacilityCategoryVo">
+		SELECT * FROM SO_facilityCategory ORDER BY facility_no ASC
+	</select>
+	
+	<insert id="insertOfficeFacility">
+		INSERT INTO so_officefacility
+		(office_no, facility_no) VALUES(
+		#{office_no},
+		#{facility_no}
+		) 
+	</insert>
+	
+	
+	
+<!-- 오피스 상세이미지 업로드 관련 -->
+	<insert id="registerImage">
+		INSERT INTO SO_ImageDetail ( 
+			office_no, 
+			image_url) 
+		VALUES(
+			#{office_no},
+			#{image_url})
+	</insert>
+	
+<!-- 오피스 운영시간 관련 -->	
+	<insert id="registerDayAndTime">
+	 	INSERT INTO SO_BusinessDay (
+	 		office_no,
+	 		business_day,
+	 		business_day_price,
+	 		business_time_start,
+	 		business_time_finish)
+	 	VALUES(
+			#{office_no},
+			#{business_day},
+			#{business_day_price},
+			#{business_time_start},
+			#{business_time_finish})
+	
+	</insert>
+
+<!-- 오피스 목록 조회 -->
+	<select id="getOfficeList" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+		SELECT * FROM so_officeinfo ORDER BY office_no DESC
+	</select>
+	
+	<select id="getMyOfficeList" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+		SELECT * FROM so_officeinfo WHERE member_no = #{member_no}
+		<choose>
+			<when test='office_approve == "Y"'>
+				and office_approve = 'Y'
+			</when>
+			<when test='office_approve == "N"'>
+				and office_approve = 'N'
+			</when>
+			<when test='office_approve == "P"'>
+				and office_approve = 'P'
+			</when>
+		</choose>
+		
+		order by office_no desc
+	</select>
+	
+	<select id="getOfficeByNo" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+		SELECT * FROM so_officeinfo WHERE office_no = #{no}
+	</select>
+	
+	<select id="getImageList" resultType="com.teamb.shareoffice.vo.ImageDetailVo">
+		SELECT * FROM so_imageDetail WHERE office_no = #{no}
+	</select>
+	
+	<select id="getBusinessDayByNo" resultType="com.teamb.shareoffice.vo.BusinessDayVo">
+		SELECT * FROM so_businessday WHERE office_no = #{no}
+	</select>
+	
+	<select id="getOfficeFacility" resultType="int">
+		SELECT facility_no FROM so_officefacility WHERE office_no = #{no}
+	</select>
+	
+	<select id="getFacilityCategory" resultType="com.teamb.shareoffice.vo.FacilityCategoryVo">
+		SELECT * FROM SO_facilityCategory WHERE facility_no = #{no}
+	</select>
+
+	
+<!-- 오피스 삭제 -->
+	<delete id="deleteOffice">
+		DELETE FROM so_officeinfo WHERE office_no = #{no}
+	</delete>	
+
+<!-- 오피스 수정 -->
+	<update id="updateOffice">
+		UPDATE so_officeinfo 
+		SET office_name = #{office_name}, office_simpleContent = #{office_simpleContent},
+		office_detailContent = #{office_detailContent}, office_personnel = #{office_personnel}, office_tags = #{office_tags}, 
+		office_address = #{office_address}, office_address_detail = #{office_address_detail}, office_managerPhone = #{office_managerPhone}, 
+		office_changedPhone = #{office_changedPhone}, office_thumbnail = #{office_thumbnail}, office_min_booking_day = #{office_min_booking_day}
+		WHERE office_no = #{office_no}
+	</update>
+	
+<!-- 	
+	<update id="updateOfficeDetailImage">
+		UPDATE so_imagedetail
+		SET image_url = #{image_url}
+		WHERE image_no = #{image_no} 
+	</update>
+	
+	<update id="updateOfficeBusinessDay">
+		UPDATE so_businessday
+		SET business_day = #{business_day}, business_day_price = #{business_day_price}, business_time_start = #{business_time_start}, business_time_finish = #{business_time_finish}
+		WHERE day_no = #{day_no}
+	</update>
+ -->	
+ 
+ 	<delete id="deleteBusinessDay">
+ 		DELETE FROM SO_BusinessDay WHERE office_no = #{no}
+ 	</delete>
+	
+	<delete id="deleteFacility">
+		DELETE FROM so_officefacility WHERE office_no = #{no}
+	</delete>
+	
+
+</mapper>

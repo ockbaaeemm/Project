@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.host.mapper.HostMapperRN">
+
+<select id="selectOfficeOrderRental" resultType="map">
+	select *
+	from so_rental sr ,
+	(select so2.*, so.member_no as host_member_no, so.office_name as office_name, so.office_thumbnail as office_thumbnail
+	from so_officeinfo so, so_order so2
+	where so.office_no = so2.office_no 
+	and so.member_no = #{host_member_no}
+	) t1
+	where sr.order_no = t1.order_no
+	and rental_date = #{rental_date}
+</select>
+
+<select id="selectOfficeOrder" resultType="map">
+	select so.*, so2.office_name as office_name, so2.office_thumbnail as office_thumbnail
+	from so_order so, so_officeinfo so2 
+	where so.office_no = so2.office_no
+	and order_no = #{order_no}
+</select>
+
+<select id="selectRentalList" resultType="com.teamb.shareoffice.vo.RentalVo">
+	select sr.*
+	from so_order so , so_rental sr 
+	where so.order_no = sr.order_no 
+	and so.order_no = #{order_no}
+</select>
+
+<update id="updateRentalStatus">
+	update so_rental
+	set rental_status = #{rental_status}
+	where rental_no = #{rental_no}
+</update>
+
+<select id="selectOrderByRentalNo" resultType="com.teamb.shareoffice.vo.OrderVo">
+	select so.*
+	from so_order so , so_rental sr 
+	where so.order_no = sr.order_no 
+	and sr.rental_no = #{rental_no}
+</select>
+
+<select id="selectRental" resultType="com.teamb.shareoffice.vo.RentalVo">
+	select *
+	from so_rental
+	where rental_no = #{rental_no}
+</select>
+
+<select id="selectMyOfficeNo" resultType="int">
+	select office_no
+	from so_officeinfo
+	where member_no = #{member_no}
+</select>
+
+<select id="selectOrderMember" resultType="map">
+	select *
+	from so_order so, so_member sm 
+	where so.member_no = sm.member_no
+	and so.office_no in 
+		<foreach collection="office_no_list" item="office_no"  open="(" close=")" separator=",">
+    		#{office_no}
+    	</foreach>
+	<choose>
+		<when test="category == 'nick'">
+			and sm.member_nick like CONCAT('%',#{searchKeyword},'%')	
+		</when>
+		<when test="category == 'order_no'">
+			and so.order_no = #{searchKeyword}
+		</when>
+		<when test="category == 'all'">
+			and (sm.member_nick like CONCAT('%',#{searchKeyword},'%') or so.order_no = #{searchKeyword})
+		</when>
+	</choose>
+	order by so.order_no desc 	
+</select>
+
+<select id="selectOfficeByOrderNo" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+	select so2.*
+	from so_order so , so_officeinfo so2 
+	where so.office_no = so2.office_no 
+	and so.order_no = #{order_no}
+</select>
+
+<select id="selectRentalByOrderNo" resultType="com.teamb.shareoffice.vo.RentalVo">
+	select sr.*
+	from so_order so , so_rental sr 
+	where so.order_no = sr.order_no 
+	and so.order_no = #{order_no}
+	<if test="onlyCancel == true">
+		and sr.rental_status = "C";
+	</if>
+</select>
+
+<select id="selectMonthRental" resultType="com.teamb.shareoffice.vo.RentalVo">
+	select *
+	from so_rental sr 
+	<![CDATA[
+	where rental_date >= #{startDay} and rental_date <= #{endDay}
+	]]>
+	and order_no in (
+		select order_no
+		from so_order so 
+		where so.office_no in (
+			select office_no
+			from so_officeinfo so2 
+			where so2.member_no = #{member_no}
+		)
+	) 
+</select>
+
+<!-- 통계/대시보드 -->
+<!-- 내 오피스 예약비율 -->
+<select id="selectRentalProportion" resultType="map">
+	select count(*) as cnt, so.office_no, so.office_name, sum(sr.rental_price) as totalPrice, so.office_approve_date 
+	from so_officeinfo so, so_order so2, so_rental sr 
+	where so.office_no = so2.office_no 
+	and so2.order_no = sr.order_no 
+	and so.member_no = #{member_no}
+	<![CDATA[
+	and datediff(#{endDateDate}, sr.rental_date) >= 0
+	group by so.office_no
+	]]>
+</select>
+
+<!-- 최근 부정적인 리뷰 5건 -->
+<select id="selectLatest5NegativeReview" resultType="map">
+	select *
+	from so_review sr ,
+	(select so.office_name, so.office_no, so2.order_no 
+	from so_officeinfo so , so_order so2 
+	where so.office_no = so2.office_no
+	and so.member_no = #{member_no}) t1
+	where sr.order_no = t1.order_no
+	<![CDATA[
+	and sr.review_rating < 3 
+	]]>
+	order by sr.review_no desc
+	limit 5
+</select>
+
+<!-- 내 오피스 리뷰 전체 평균 -->
+<select id="selectMyOfficeReviewAvg" resultType="double">
+	select round(avg(review_rating), 2) as avg
+	from so_review sr,
+	(select so2.order_no 
+	from so_officeinfo so, so_order so2 
+	where so.office_no = so2.office_no 
+	and so.member_no = #{member_no}
+	) t1
+	where sr.order_no = t1.order_no
+</select>
+
+<!-- 특정 오피스 특정 기간 예약비율 -->
+<select id="selectOneOfficeRentalProportion" resultType="map">
+	select count(*) as cnt, so.office_no, so.office_name, sum(sr.rental_price) as totalPrice
+	from so_officeinfo so, so_order so2, so_rental sr 
+	where so.office_no = so2.office_no 
+	and so2.order_no = sr.order_no 
+	and so.office_no = #{office_no}
+	and sr.rental_date between #{startDate} and #{endDate}
+</select>
+
+</mapper>

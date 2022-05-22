@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	<link th:href="@{/css/commons.css}" rel="stylesheet">
+	<link th:href="@{/css/style.css}" rel="stylesheet">
+	
+	<style>
+        a {text-decoration: none;}
+
+        a:link {
+            color : black;
+        }
+        a:visited {
+          color : black;
+        }
+        a:hover {
+           color : black;
+        }
+        a:active {
+           color : black
+        }
+	
+	</style>
+	
+	<script th:inline="javascript">
+	function createJobOption(selectBox) {
+		
+		var jobCategoryBox = document.querySelector("#groupTwo");
+		
+		/*<![CDATA[*/
+		var jobCategoryList = /*[[ ${jobCategoryList} ]]*/;
+		/*]]*/
+
+		for(var option of jobCategoryBox.querySelectorAll("option")) {
+			if(option.id != "invalidJob") {
+				option.remove();
+			}
+		}	
+		
+		if(selectBox.value == 1) {
+			jobCategoryBox.disabled = false;
+			
+			for(var jobCategory of jobCategoryList) {
+				var option = document.createElement("option");
+				option.innerText = jobCategory.job_name;
+				option.value = jobCategory.job_no;
+				
+				jobCategoryBox.appendChild(option);
+			}
+			
+		}else {
+			jobCategoryBox.disabled = true;
+					
+			return;	
+		}
+	}    	
+	
+	</script>
+	
+</head>
+<body>
+<div style="margin:0 auto;">
+  <div class="container-fluid">
+    <th:block th:include="commons/biz_navbar"></th:block>
+	
+	<!-- 220301 프로젝트 관리 UI 추가 HKLEE -->
+    <div class="row">
+        <div class="col">
+            <div class="container_wrap">
+			<div id="contents" align="center">
+			<div style="height:1; width:5%; border-top:1px solid gray;"></div><br>
+				<h1 class="tit_page"><a href="./projectListPage">프로젝트 관리</a></h1>
+				<div class="cont_area mt-5">
+					<form action="./projectListPage" method="post">
+						<div class="search_area" style="width:950px; border:1px solid gray;">
+							<dl>							
+								<dt>검색조건</dt>
+								<dd>
+									<select class="select_01" name="searchOption">
+										<option th:selected="${searchData.searchOption == null or searchData.searchOption == 'all'}" value="all">전체</option>
+										<option th:selected="${searchData.searchOption == 'project'}" value="project" >프로젝트명</option>
+										<option th:selected="${searchData.searchOption == 'price'}" value="price" >비용</option>
+									</select>
+									<input type="text" size=70 class="inp_w385 ml7" name="searchKeyword" th:value="${searchData.searchKeyword}">
+									<input type="submit" value="검색" class="btn btn-primary">						
+								</dd>
+								
+								<dt style="margin-left:-150px;">분야</dt>
+								<dd>
+									<select class="select_02" name="groupOne" id="groupOne" onchange="createJobOption(this)">
+										<option th:selected="${searchData.groupOne == 0}" value="0">1차 분류</option>
+										<option th:selected="${searchData.groupOne == 1}" value="1">프리랜서 매칭</option>
+										<option th:selected="${searchData.groupOne == 2}" value="2">IT 아웃소싱</option>
+									</select>
+									<select class="select_03" name="groupTwo" id="groupTwo" th:disabled="${searchData.groupOne != 1}" style="width:150px;">
+										<option th:selected="${searchData.groupOne != 1}" id="invalidJob" value="0">2차 분류</option>
+										<option th:each="jobCategory : ${jobCategoryList}"
+                                    	th:value="${jobCategory.job_no}"
+                                    	th:utext="${jobCategory.job_name}" th:selected="${searchData.groupTwo == jobCategory.job_no}"></option>
+									</select>
+									상태
+										<label for="state_all"><input type="radio" name="state_cdT" th:checked="${searchData.state_cdT == 'all'}" value="all" th:text="전체"></label>
+										<label for="state_ing" class="lable1"><input type="radio" name="state_cdT" th:checked="${searchData.state_cdT == 'Y'}" value="Y" th:text="진행중"></label>
+										<label for="state_end" class="lable1"><input type="radio" name="state_cdT" th:checked="${searchData.state_cdT == 'N'}" value="N" th:text="마감"></label>							
+								</dd>
+								
+							</dl>
+						</div>
+					</form>
+					<br>
+					<div id="tot_cnt"><p class="txt_seach" style="margin-right:860px;" th:text="'검색결과 : ' + ${totalCount}"></p></div>
+					<table class="table_list" style="width:950px; border:1px solid gray;">
+							<colgroup>
+								<col width="60">
+								<col width="105">
+								<col width="300">
+								<col width="100">
+								<col width="90">
+								<col width="65">
+								<col width="90">
+								<col width="80">
+							</colgroup>
+							<thead>
+							<tr>
+								<th scope="col" style="border:1px solid gray">NO</th>
+								<th scope="col" style="border:1px solid gray">분야</th>
+								<th scope="col" style="border:1px solid gray">프로젝트명</th>
+								<th scope="col" style="border:1px solid gray">금액</th>
+								<th scope="col" style="border:1px solid gray">마감일자</th>
+								<th scope="col" style="border:1px solid gray">상태</th>								
+								<th scope="col" style="border:1px solid gray">등록일자</th>
+								<th scope="col" style="border:1px solid gray">조회수</th>
+								<th scope="col" style="border:1px solid gray">스크랩</th>
+							</tr>
+								<!-- DB 테이블 호출 -->
+								<tr th:each="list : ${projectList}" style="border:1px solid gray">
+									<td th:text="${list.projectBoardVo.project_no}" style="border:1px solid gray"></td>
+									
+									<td th:if="${list.projectBoardVo.recruitType_no == 1}" th:text="${list.recruitTypeCategoryVo.recruitType_name} + ' > ' + ${list.jobCategoryVo.job_name}" style="border:1px solid gray"></td>
+									<td th:if="${list.projectBoardVo.recruitType_no == 2}" th:text="${list.recruitTypeCategoryVo.recruitType_name}" style="border:1px solid gray"></td>									
+									
+									<td style="border:1px solid gray">
+										<a th:href="@{./projectDetailPage(project_no=${list.projectBoardVo.project_no})}" th:text="${list.projectBoardVo.project_name}"></a>
+									</td>
+									<td th:text="${list.projectBoardVo.project_price}" style="border:1px solid gray"></td>
+									<td th:text="${list.projectBoardVo.project_period}" style="border:1px solid gray"></td>
+									<td th:if="${list.projectBoardVo.project_state == 'Y'}" th:text="접수중" style="border:1px solid gray"></td>
+									<td th:unless="${list.projectBoardVo.project_state == 'Y'}" th:text="마감" style="border:1px solid gray"></td>
+									<td th:text="${#dates.format(list.projectBoardVo.project_date, 'yyyy-MM-dd HH:mm:ss')}" style="border:1px solid gray"></td>
+									<!-- 조회수, 스크랩 임시 0 -->
+									<td th:text="${'0'}" style="border-right:1px solid gray"></td>
+									<td th:text="${'0'}" style="border-right:1px solid gray"></td>
+								</tr>
+							</thead>
+					</table>
+					<span style="float:right;"></span>
+					<div class="btn_area right me-5" style="float:right;">
+						<a href="../biz/registProjectPage" class="btn btn_orange" style="margin-right:350px;"><span class="border">등록</span></a>
+					</div>
+					
+					<div class="row mt-5">
+						<div class="col"></div>
+						<div class="col text-center">
+							<nav aria-label="...">
+							  <ul class="pagination" >							  
+							  	<li th:if="${startPage <= 1}" class="page-item disabled" > 
+							  		<a class="page-link">&lt;</a>
+							  	</li>
+							 	<li th:unless="${startPage <= 1}" class="page-item"> 
+							  		<a class="page-link" th:href="'./projectListPage?'+ ${additionalParam} + '&pageNum='+${startPage-1}">&lt;</a>
+							  	</li>
+							    
+							    <li th:each="i : ${#numbers.sequence(startPage,endPage)}" class="page-item" th:classappend="${currentPage} == ${i} ? active">
+									<a class="page-link" th:href="'./projectListPage?'+ ${additionalParam} +'&pageNum=' + ${i}" th:text="${i}" ></a>
+								</li>
+							    
+							    <li th:if="${endPage >= totalPage}" class="page-item disabled">
+							  		 <a class="page-link">&gt;</a>
+							 	</li>
+							  	<li th:unless="${endPage >= totalPage}" class="page-item"> 
+							  		 <a class="page-link" th:href="'./projectListPage?'+ ${additionalParam} + '&pageNum='+${endPage+1}">&gt;</a>
+							  	</li>
+							    
+							  </ul>
+							</nav>						
+						</div>
+						<div class="col"></div>					
+					</div>					
+				</div>
+			</div>
+		</div>
+            
+        </div>
+    </div>
+
+    <th:block th:include="commons/footer"></th:block>
+  </div> 
+</div>  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>

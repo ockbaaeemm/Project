@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+<link th:href="@{/css/commons.css}" rel="stylesheet">
+
+  <script th:inline="javascript">
+  
+  	var confirm_id = false;
+  	var confirm_pw = false;
+  	var confirm_email = false;
+  	var confirm_emailDomain = false;
+	
+	function joinMemberValidCheck(e){
+		
+		e.preventDefault();
+		
+		//입력 유무 체크
+		
+		if($("#inputId").val() == ""){
+			alert("아이디를 입력해주세요.");
+			$("#inputId").focus();
+			return;
+		}
+		
+		if(!confirm_id) {
+			alert("사용 불가능한 아이디 입니다. 다시 입력해주세요.");
+			$("#inputId").focus();
+			return;
+		}
+		
+		if($("#inputPw").val() == ""){
+			alert("비밀번호를 입력해주세요.");
+			$("#inputPw").focus();
+			return;
+		}
+		
+		if($("#inputPwConfirm").val() == ""){
+			alert("비밀번호를 재확인해주세요.");
+			$("#inputPwConfirm").focus();
+			return;
+		}
+		
+		if(!confirm_pw) {
+			alert("비밀번호를 확인해주세요.");
+			$("#inputPw").focus();
+			return;
+		}		
+		
+		if($("#inputName").val() == ""){
+			alert("이름을 입력해주세요.");
+			$("#inputName").focus();
+			return;
+		}
+		
+		if($("#inputNumber").val() == ""){
+			alert("전화번호를 입력해주세요.");
+			$("#inputNumber").focus();
+			return;
+		}
+		
+		if($("#inputPhone").val() == ""){
+			alert("휴대폰번호를 입력해주세요.");
+			$("#inputPhone").focus();
+			return;
+		}
+		
+		if($("#inputEmail").val() == ""){
+			alert("이메일 아이디를 입력해주세요.");
+			$("#inputEmail").focus();
+			return;
+		}
+		
+		if($("#inputEmailDomain").val() == ""){
+			alert("이메일 도메인을 입력해주세요.");
+			$("#inputEmailDomain").focus();
+			return;
+		}
+		
+		if(!confirm_email) {
+			alert("이메일을 확인해주세요.");
+			$("#inputEmail").focus();
+			return;			
+		}
+		
+		if(!confirm_emailDomain) {
+			alert("이메일 도메인을 확인해주세요.");
+			$("#inputEmailDomain").focus();
+			return;			
+		}		
+		
+		if($("#formFileSm").val() == ""){
+			alert("프로필이미지를 선택해주세요.");
+			$("#formFileSm").focus();
+			return;
+		}
+		
+		if($("#inputBirth_yy").val() == "" || $("#inputBirth_mm").val() == "" || $("#inputBirth_dd").val() == ""){
+			alert("생년월일을 입력해주세요.");
+			$("#inputBirth_yy").focus();
+			return;
+		}
+		
+		if($("#inputAddress").val() == ""){
+			alert("주소를 입력해주세요.");
+			$("#inputAddress").focus();
+			return;
+		} 
+		
+		//전화번호, 휴대폰번호 합치기
+		var inputNumeber = document.getElementById("inputNumeber");
+		var inputNumeber2 = document.getElementById("inputNumeber2");
+		var inputNumeber3 = document.getElementById("inputNumeber3");
+		inputNumber.value = inputNumber.value + "-" + inputNumber2.value + "-" + inputNumber3.value;
+		
+		var inputPhone = document.getElementById("inputPhone");
+		var inputPhone2 = document.getElementById("inputPhone2");
+		var inputPhone3 = document.getElementById("inputPhone3");
+		inputPhone.value = inputPhone.value + "-" + inputPhone2.value + "-" + inputPhone3.value;
+		
+		// 이메일 주소 합치기
+		var inputEmail = document.getElementById("inputEmail");
+		var inputEmailDomain = document.getElementById("inputEmailDomain");
+		inputEmail.value = inputEmail.value + "@" + inputEmailDomain.value;
+		
+		// 생년월일 합치기
+		var inputBirth_yy = document.getElementById("inputBirth_yy");
+		var inputBirth_mm = document.getElementById("inputBirth_mm");
+		var inputBirth_dd = document.getElementById("inputBirth_dd");
+
+		var month = parseInt(inputBirth_mm.value);
+		var day = parseInt(inputBirth_dd.value);
+		
+		
+		if(month == 2 && day > 28) {
+
+			inputBirth_dd.value = "28";
+		}
+		else if(month%2 == 0 && day > 30) {
+
+			inputBirth_dd.value = "30";
+		}
+		
+		var customer_birth = document.getElementsByName("customer_birth")[0];
+		customer_birth.value = inputBirth_yy.value + "-" + inputBirth_mm.value + "-" + inputBirth_dd.value; 				
+		
+		// 상세주소 입력양식 찾기
+		var inputDetailAddress = document.getElementById("inputDetailAddress");
+		var inputAddress = document.getElementById("inputAddress");
+		// 상세주소가 입력된게 있다면 주소찾기를 통해 찾은 주소와 합치기
+		if(inputDetailAddress.value != null) {
+			inputAddress.value = inputAddress.value + ", " + inputDetailAddress.value;
+		}
+		
+		
+		//submit 실행
+		var frm = document.getElementById("frm");
+		frm.submit();
+		
+	}
+	
+	
+	
+	function confirmId() {
+		var idBox = document.getElementById("inputId");
+		var idValue = idBox.value;
+		//정규표현식
+		var idRegExp = /^[a-z]+[a-z0-9]{3,15}$/;
+		
+		//AJAX 호출
+		var xhr = new XMLHttpRequest();
+		
+		xhr.onreadystatechange = function(){
+			if(xhr.readyState == 4 && xhr.status == 200) {
+				var data = JSON.parse(xhr.responseText);
+				
+				var confirmIdAlertBox = document.getElementById("confirmIdAlertBox")
+				
+				if(data.result == true) {
+					confirm_id = false;
+					confirmIdAlertBox.innerText = "이미 존재하는 아이디 입니다.";
+					confirmIdAlertBox.style.color = "red";
+				} else {
+					confirm_id = true;
+					confirmIdAlertBox.innerText = "사용 가능한 아이디 입니다.";
+					confirmIdAlertBox.style.color = "green";
+				}
+				
+				if(!idRegExp.test($("#inputId").val())){
+					confirm_id = false;
+					confirmIdAlertBox.innerText = "아이디는 영문소문자 또는 영문소문자, 숫자 조합으로 4~16자로 입력해 주세요.";
+					confirmIdAlertBox.style.color = "red";
+				}
+				
+				
+				
+			}
+			
+		};
+		
+		xhr.open("GET", "./isExistId?member_id=" + idValue, true);
+		xhr.send();
+		
+	}
+	
+	function confirmPw() {
+		//정규표현식...
+		var pwRegExp = /(?=.*\d)(?=.*[a-zA-ZS]).{8,}/;
+		
+		
+		var confirmPwAlertBox = document.getElementById("confirmPwAlertBox");
+		
+		if(!pwRegExp.test($("#inputPw").val())){
+			confirm_pw = false;
+			confirmPwAlertBox.innerText = "비밀번호는 문자, 숫자 1개이상 포함하여 8자리 이상이어야 합니다.";
+			confirmPwAlertBox.style.color = "red";			
+		} else {
+			confirm_pw = true;
+			confirmPwAlertBox.innerText = "사용 가능한 비밀번호입니다.";
+			confirmPwAlertBox.style.color = "green";			
+		}
+		
+	}
+	
+	
+	
+	function reConfirmPw() {
+		
+		var reConfirmPwAlertBox = document.getElementById("reConfirmPwAlertBox")
+		
+		if( $("#inputPw").val() != $("#inputPwConfirm").val() ){
+			confirm_pw = false;
+			reConfirmPwAlertBox.innerText = "입력하신 비밀번호가 일치하지 않습니다.";
+			reConfirmPwAlertBox.style.color = "red";
+		} else {
+			confirm_pw = true;
+			reConfirmPwAlertBox.innerText = "";
+			reConfirmPwAlertBox.style.color = "green";
+		}
+		
+	}
+	
+	function onlyNumberConfirm() {
+		
+		//정규표현식...
+		var onlyNumberRegExp = /^[0-9]+$/;
+		
+		var birthConfirmPwAlertBox = document.getElementById("birthConfirmPwAlertBox");
+		
+		if(!onlyNumberRegExp.test($("#inputBirth_yy").val()) || !onlyNumberRegExp.test($("#inputBirth_dd").val())){
+			birthConfirmPwAlertBox.innerText = "생년월일은 숫자만 입력 바랍니다.";
+			birthConfirmPwAlertBox.style.color = "red";
+		} else {
+			birthConfirmPwAlertBox.innerText = "";
+			birthConfirmPwAlertBox.style.color = "green";
+		}
+		
+	}
+	
+	
+	function confirmEmail() {
+		//정규표현식...
+		//var emailRegExp = /^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*.[a-zA-Z]{2,3}$/i;
+		
+		var emailRegExp = /^[A-za-z0-9]([-_]?[A-za-z0-9])/g;
+		
+		var inputEmail = document.getElementById("inputEmail");
+		
+		var emailConfirmPwAlertBox = document.getElementById("emailConfirmPwAlertBox");
+		
+		if(!emailRegExp.test(inputEmail.value)) {
+			emailConfirmPwAlertBox.innerText = "이메일 주소를 형식에 맞게 입력해주세요";
+			emailConfirmPwAlertBox.style.color = "red";
+			confirm_email = false;
+		} else {
+			emailConfirmPwAlertBox.innerText = "";
+			emailConfirmPwAlertBox.style.color = "green";
+			confirm_email = true;
+		}
+		
+	}
+	
+	
+	function confirmEmailDomain() {
+		var domainRegExp = /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/;
+		var inputEmailDomain = document.getElementById("inputEmailDomain");
+		
+		var emailConfirmPwAlertBox = document.getElementById("emailConfirmPwAlertBox");
+		
+		if(!domainRegExp.test(inputEmailDomain.value)) {
+			emailConfirmPwAlertBox.innerText = "이메일 도메인을 형식에 맞게 입력해주세요";
+			emailConfirmPwAlertBox.style.color = "red";
+			confirm_emailDomain = false;
+		} else {
+			emailConfirmPwAlertBox.innerText = "";
+			emailConfirmPwAlertBox.style.color = "green";
+			confirm_emailDomain = true;
+		}
+	}
+	
+	function setEmailDomain(domain){
+        $("#inputEmailDomain").val(domain);
+        $("#emailConfirmPwAlertBox").text("");
+        confirm_emailDomain = true;        
+    }
+	
+	function findAddr(){
+		new daum.Postcode({
+	        oncomplete: function(data) {
+				
+				// 도로명 주소 변수
+				var roadAddr = data.roadAddress;
+				// 지번 주소 변수
+				var jibunAddr = data.jibunAddress;
+				
+	            if(roadAddr !== ''){
+	                document.getElementById("inputAddress").value = roadAddr;
+	            } 
+	            else if(jibunAddr !== ''){
+	                document.getElementById("inputAddress").value = jibunAddr;
+	            }
+	        }
+	    }).open();
+	}
+	
+	
+	
+	function jobSelectOptionChange(optionVal){
+		
+		console.log("옵션값 : " + optionVal);
+		
+		for(var selectOption of document.querySelectorAll(".jobSelect")) {
+			if(selectOption != optionVal && selectOption.value == optionVal.value) {
+				optionVal.value = 0;
+				alert("이미 선택하신 직종입니다 다시 선택바랍니다.");
+				
+				return;
+			}
+			
+			console.log(selectOption.value);
+		}
+		
+	}
+	
+	function localSelectOptionChange(optionVal){
+		
+		for(var selectOption of document.querySelectorAll(".localSelect")) {
+			if(selectOption != optionVal && selectOption.value == optionVal.value) {
+				optionVal.value = 0;
+				alert("이미 선택하신 지역입니다 다시 선택바랍니다.");
+				
+				return;
+			}
+			
+			console.log(selectOption.value);
+		}
+	}
+
+	function addJob(){
+		
+		/*<![CDATA[*/
+		var jobList = /*[[ ${jobList} ]]*/;
+		/*]]*/
+		
+		var jobRoot = document.getElementById("jobRoot");
+		
+		var rowBox = document.createElement("div");
+		rowBox.setAttribute("class", "row mt-1");
+		
+		
+		/*job 셀렉트박스 추가*/
+		var jobSelectColBox = document.createElement("div");
+		jobSelectColBox.setAttribute("class", "col");
+		rowBox.appendChild(jobSelectColBox);
+		
+		var selectBox = document.createElement("select");
+		selectBox.setAttribute("class", "form-select jobSelect");
+		selectBox.setAttribute("name", "job_no");
+		selectBox.setAttribute("onchange", "jobSelectOptionChange(this)");
+		jobSelectColBox.appendChild(selectBox);
+		
+		var optionTitle = document.createElement("option");
+		optionTitle.setAttribute("selected", "");
+		optionTitle.innerText = '전체';
+		optionTitle.value = 0;
+		selectBox.appendChild(optionTitle);
+		
+		for(job of jobList) {
+			var option = document.createElement("option");
+			option.value = job.job_no;
+			option.innerText = job.job_name;
+			selectBox.appendChild(option);
+		}
+		
+		jobRoot.appendChild(rowBox);
+		
+		/*삭제버튼 추가*/
+		var deleteButtonBox = document.createElement("div");
+		deleteButtonBox.setAttribute("class", "col");
+		rowBox.appendChild(deleteButtonBox);
+		
+		var deleteButton = document.createElement("button");
+		deleteButton.setAttribute("type", "button");
+		deleteButton.setAttribute("class", "btn btn-light");
+		deleteButton.setAttribute("onclick", "deleteJobSelect(this)");
+		deleteButton.innerText = "삭제";
+		deleteButtonBox.appendChild(deleteButton);
+		
+	}
+	
+	
+	function deleteJobSelect(obj) {
+		var divRow = obj.closest(".row");
+		
+		divRow.remove();
+		
+	}
+
+	function addLocal() {
+		
+		/*<![CDATA[*/
+		var localList = /*[[ ${localList} ]]*/;
+		/*]]*/
+		
+		var localRoot = document.getElementById("localRoot");
+		
+		var rowBox = document.createElement("div");
+		rowBox.setAttribute("class", "row mt-1");
+		
+		/*local 셀렉트박스 추가*/
+		var localSelectColBox = document.createElement("div");
+		localSelectColBox.setAttribute("class", "col");
+		rowBox.appendChild(localSelectColBox);
+		
+		var selectBox = document.createElement("select");
+		selectBox.setAttribute("class", "form-select localSelect");
+		selectBox.setAttribute("name", "local_no");
+		selectBox.setAttribute("onchange", "localSelectOptionChange(this)");
+		localSelectColBox.appendChild(selectBox);
+		
+		var optionTitle = document.createElement("option");
+		optionTitle.setAttribute("selected", "");
+		optionTitle.innerText = '전체'
+		optionTitle.value = 0;
+		selectBox.appendChild(optionTitle);
+		
+		for(local of localList) {
+			var option = document.createElement("option");
+			option.value = local.local_no;
+			option.innerText = local.local_name;
+			selectBox.appendChild(option);
+		}
+		
+		localRoot.appendChild(rowBox);
+		
+		/*삭제버튼 추가*/
+		var deleteButtonBox = document.createElement("div");
+		deleteButtonBox.setAttribute("class", "col");
+		rowBox.appendChild(deleteButtonBox);
+		
+		var deleteButton = document.createElement("button");
+		deleteButton.setAttribute("type", "button");
+		deleteButton.setAttribute("class", "btn btn-light");
+		deleteButton.setAttribute("onclick", "deleteLocalSelect(this)");
+		deleteButton.innerText = "삭제";
+		deleteButtonBox.appendChild(deleteButton);
+		
+		
+	}
+	
+	function deleteLocalSelect(obj) {
+		var divRow = obj.closest(".row");
+		
+		divRow.remove();
+	}
+	
+	function onlyNumber(obj) {
+		
+		/*if ((event.keyCode < 48) || (event.keyCode > 57))
+            event.returnValue = false;*/
+            
+            obj.value = obj.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');            
+
+	}
+
+	
+	function onlyKorean(event) {
+		
+		if((event.keyCode < 12592) || (event.keyCode > 12687)){
+			event.returnValue = false;
+		}
+	}
+
+	
+	$(document).ready(function(){ 
+		var now = new Date();
+		var year = now.getFullYear();
+		var mon = (now.getMonth() + 1) > 9 ? ''+(now.getMonth() + 1) : '0'+(now.getMonth() + 1);
+		var day = (now.getDate()) > 9 ? ''+(now.getDate()) : '0'+(now.getDate()); 
+		
+		//년도 selectbox만들기 
+		for(var i = 1900 ; i <= year ; i++) { 
+			$('#inputBirth_yy').append('<option value="' + i + '">' + i + '년</option>');
+		} 
+		
+		// 월별 selectbox 만들기 
+		for(var i=1; i <= 12; i++) {
+			var mm = i > 9 ? i : "0"+i ;
+			$('#inputBirth_mm').append('<option value="' + mm + '">' + mm + '월</option>');
+		}
+		
+		// 일별 selectbox 만들기
+		for(var i=1; i <= 31; i++) {
+			var dd = i > 9 ? i : "0"+i ;
+			$('#inputBirth_dd').append('<option value="' + dd + '">' + dd+ '일</option>');
+		}
+		
+		// 기본 값 오늘 날짜로 세팅
+		$("#inputBirth_yy > option[value="+year+"]").attr("selected", "true");
+		$("#inputBirth_mm > option[value="+mon+"]").attr("selected", "true");
+		$("#inputBirth_dd > option[value="+day+"]").attr("selected", "true"); 
+	})
+
+</script>
+
+</head>
+<body>
+<div style="margin:0 auto;">
+  <div class="container-fluid">
+    <th:block th:include="commons/normal_navbar"></th:block>
+	
+	<div style="width:1010px; margin:0 auto">
+		<div class="container-fluid">
+			
+			<div class="row" style="padding:25px;"><!-- 여백 --></div>
+			
+			<div class="row">
+				<div class="col text-center fs-2 fw-bold">회원가입</div>
+			</div>
+		 	<div class="row mt-5">
+		 	
+		 		<div class="col"></div> <!-- 왼쪽 여백 -->
+		 		
+		 		<div class="col-10">
+		 			<div class="row mt-3"> <!-- 회원가입 글자 아래 구분선 -->
+		 				<div class="col"><hr></div>
+		 			</div>
+		 			
+		 			<form id="frm" action="joinMemberProcess" method="post" enctype="multipart/form-data">
+		 			
+			 			<div class="row"><!-- 아이디 입력란 -->
+			 				<div class="col">
+			 					<div class="row">
+			 						<div class="col-2">
+					 					<p class="center">아이디</p>
+					 				</div>
+					 				<div class="col-4">
+					 					<input name="member_id" id="inputId" type="text" class="form-control" 
+					 					placeholder="아이디를 입력해주세요" th:onblur="|confirmId()|" maxlength="16">
+					 					<input type="hidden" name="member_approval" value="Y">
+					 					<input type="hidden" name="member_type" value="N">
+					 				</div>
+					 				<div class="col"></div>
+			 					</div>
+			 					<div class="row">
+			 						<div class="col-2">
+					 				</div>
+					 				<div class="col">
+					 					<div id="confirmIdAlertBox" style="font-size: small;"></div>
+					 				</div>
+			 					</div>
+			 				</div>
+			 				
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- pw 입력란 -->
+			 			
+			 				<div class="col">
+			 				
+			 					<div class="row">
+			 						<div class="col-2">
+			 							<p class="center">비밀번호</p>
+					 				</div>
+					 				<div class="col-4">
+					 					<input id="inputPw" name="member_pw" type="password" class="form-control" 
+					 					placeholder="비밀번호를 입력해주세요" th:onblur="|confirmPw()|">
+					 				</div>
+					 				<div class="col"></div>
+			 					</div>
+			 				
+			 					<div class="row">
+			 						<div class="col-2">
+					 				</div>
+					 				<div class="col">
+					 					<div id="confirmPwAlertBox" style="font-size: small;"></div>
+					 				</div>
+			 					</div>
+			 					
+			 				</div>
+	 						
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- pw 재입력란 -->
+			 			
+			 				<div class="col">
+			 				
+			 					<div class="row">
+			 						<div class="col-2">
+			 							<p class="center">비밀번호 확인</p>
+					 				</div>
+					 				<div class="col-4">
+					 					<input id="inputPwConfirm" type="password" class="form-control" 
+					 					placeholder="비밀번호를 재입력해주세요" th:onblur="|reConfirmPw()|">
+					 				</div>
+					 				<div class="col"></div>
+			 					</div>
+			 				
+			 					<div class="row">
+			 						<div class="col-2">
+					 				</div>
+					 				<div class="col">
+					 					<div id="reConfirmPwAlertBox" style="font-size: small;"></div>
+					 				</div>
+			 					</div>
+			 					
+			 				</div>
+			 				
+			 				
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 이름 입력란 -->
+			 				<div class="col-2">
+			 					<p class="center">이름</p>
+			 				</div>
+			 				<div class="col-4">
+			 					<input id="inputName" name="member_name" type="text" class="form-control" th:onkeypress="onlyKorean(event)" placeholder="이름(한글)을 입력해주세요">
+			 				</div>
+			 				<div class="col"></div>
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 전화번호 입력란 -->
+			 				<div class="col-2">
+			 					<p class="center">전화번호</p>
+			 				</div>
+			 				<div class="col-2">
+			 					<input id="inputNumber" name="customer_number" type="text" maxlength="3"
+			 					class="form-control" th:oninput="onlyNumber(this)" placeholder="02">
+			 				</div>
+			 				<div class="col-2">
+			 					<input id="inputNumber2" type="text" maxlength="4"
+			 					class="form-control" th:oninput="onlyNumber(this)" placeholder="1111">
+			 				</div>
+			 				<div class="col-2">
+			 					<input id="inputNumber3" type="text" maxlength="4"
+			 					class="form-control" th:oninput="onlyNumber(this)" placeholder="2222">
+			 				</div>
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 휴대폰 입력란 -->
+			 				<div class="col-2">
+			 					<p class="center">휴대폰</p>
+			 				</div>
+			 				<div class="col-2">
+			 					<input id="inputPhone" name="member_phone" type="text" maxlength="3"
+			 					class="form-control" th:oninput="onlyNumber(this)" placeholder="010">
+			 				</div>
+			 				<div class="col-2">
+			 					<input id="inputPhone2" type="text" maxlength="4"
+			 					class="form-control" th:oninput="onlyNumber(this)" placeholder="1111">
+			 				</div>
+			 				<div class="col-2">
+			 					<input id="inputPhone3" type="text" maxlength="4"
+			 					class="form-control" th:oninput="onlyNumber(this)" placeholder="2222">
+			 				</div>
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- email 입력란 -->
+			 				<div class="col">
+			 					<div class="row">
+			 						<div class="col-2">
+					 					<p class="center">이메일</p>
+					 				</div>
+					 				<div class="col-2" style="padding-right:1px;">
+					 					<input id="inputEmail" name="member_email" type="text" th:onblur="confirmEmail()" 
+					 					class="form-control" style="padding-right:1px;">
+					 				</div>
+					 				<div class="center" style="width:1px; padding:12px;">@</div>
+					 				<div class="col-2">
+					 					<input id="inputEmailDomain" type="text" class="form-control" th:onblur="confirmEmailDomain()">
+					 				</div>
+					 				<div class="col-2" style="padding:0px;">
+					 					<select class="form-select" th:onchange="setEmailDomain(this.value);return false;">
+										    <option value="">직접입력</option>
+										    <option value="naver.com">naver.com</option>
+										    <option value="gmail.com">gmail.com</option>
+										    <option value="daum.net">hanmail.net</option>
+										    <option value="hotmail.com">hotmail.com</option>
+										    <option value="korea.com">korea.com</option>
+										    <option value="nate.com">nate.com</option>
+										    <option value="yahoo.com">yahoo.com</option>
+										</select>
+					 				</div>
+			 					</div>
+			 					
+			 					<div class="row">
+			 						<div class="col-2">
+					 				</div>
+					 				<div class="col">
+					 					<div id="emailConfirmPwAlertBox" style="font-size: small;"></div>
+					 				</div>
+			 					</div>
+			 				</div>
+			 			
+			 				
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 프로필사진 첨부  -->
+			 				<div class="col-2">
+			 					<p class="center">프로필이미지</p>
+			 				</div>
+			 				<div class="col-4">
+			 					<input class="form-control form-control-sm" id="formFileSm" type="file" accept="image/*" multiple name="uploadFileThumbnail">
+			 				</div>
+			 				<div class="col"></div>
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 생년월일 -->
+			 			
+			 				<div class="col">
+			 					<div class="row">
+			 						<div class="col-2">
+					 					<p class="center">생년월일</p>
+					 				</div>
+					 				<div class="col-2">
+					 					<!-- <input id="inputBirth_yy" name="customer_birth" type="text" maxlength="4"
+					 					class="form-control" th:onblur="|onlyNumberConfirm()|" placeholder="년(4자)"> -->
+					 					
+					 					<select class="form-control" id="inputBirth_yy"></select>
+										<input type="hidden" name="customer_birth">
+					 				</div>
+					 				<div class="col-2">
+		                                <select class="form-control" id="inputBirth_mm"></select>
+					 				</div>
+					 				<div class="col-2">
+					 					<select class="form-control" id="inputBirth_dd"></select>
+					 				</div>
+			 					</div>
+			 					
+			 					<div class="row">
+			 						<div class="col-2">
+					 				</div>
+					 				<div class="col">
+					 					<div id="birthConfirmPwAlertBox" style="font-size: small;"></div>
+					 				</div>
+			 					</div>
+			 					
+			 				</div>
+			 				
+			 				
+			 			</div>
+			 			
+			 			<div class="row mt-1"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 주소 입력란 -->
+			 				<div class="col">
+			 				
+			 					<div class="row">
+			 						<div class="col-2">
+					 					<p class="center">주소</p>
+					 				</div>
+					 				<div class="col-7">
+					 					<input id="inputAddress" name="member_address" type="text" class="form-control" readonly>
+					 				</div>
+					 				<div class="col"><button type="button" class="btn btn-light" th:onclick="|findAddr()|">주소 찾기</button></div>
+			 					</div>
+			 					<div class="row">
+			 						<div class="col-2">
+					 					<p class="center">상세주소</p>
+					 				</div>
+					 				<div class="col-3">
+					 					<input id="inputDetailAddress" type="text" class="form-control">
+					 				</div>
+			 					</div>
+			 					
+			 				</div>
+			 				
+			 				
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 직종 선택란 -->
+			 				<div class="col-2">
+			 					<p class="center">직종</p>
+			 				</div>
+			 				<div class="col-6" id="jobRoot">
+			 					<div class="row">
+			 					
+			 						<div class="col">
+			 							<select class="form-select jobSelect" name="job_no" onchange="jobSelectOptionChange(this);">
+										  <option selected value="0">전체</option>
+										  <option th:each="jobList : ${jobList}" th:value="${jobList.job_no}"
+										    	  th:utext="${jobList.job_name}">
+										  </option>
+										</select>
+			 						</div>
+			 						
+			 						<div class="col">
+			 							<button type="button" class="btn btn-light" th:onclick="|addJob()|" >추가</button>
+			 						</div>
+			 						
+			 					</div>
+			 				</div>
+			 			
+			 				
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 희망지역 선택란 -->
+			 				<div class="col-2">
+			 					<p class="center">희망지역</p>
+			 				</div>
+			 				<div class="col-6" id="localRoot">
+			 					<div class="row">
+			 					
+			 						<div class="col">
+			 							<select class="form-select localSelect" name="local_no" onchange="localSelectOptionChange(this);">
+										  <option selected value="0">전체</option>
+										  <option th:each="localList : ${localList}" th:value="${localList.local_no}"
+										  		  th:utext="${localList.local_name}">
+										  </option>
+										</select>
+			 						</div>
+			 						
+			 						<div class="col">
+			 							<button type="button" class="btn btn-light" th:onclick="|addLocal()|">추가</button>
+			 						</div>
+			 						
+			 					</div>
+			 					
+			 				</div>
+			 			</div>
+			 			
+			 			<div class="row"> <!-- 구분선 -->
+			 				<div class="col"><hr></div>
+			 			</div>
+			 			
+			 			<div class="row"><!-- 정보수신동의 -->
+			 				<div class="col-2">
+			 					<p class="center">정보수신 동의</p>
+			 				</div>
+			 				<div class="col-4 mt-2">
+			 					<div class="form-check form-check-inline">
+								  <input class="form-check-input" type="checkbox" name="customer_agree_email" value="Y">
+								  <label class="form-check-label">이메일</label>
+								</div>
+								<div class="form-check form-check-inline">
+								  <input class="form-check-input" type="checkbox" name="customer_agree_sns" value="Y">
+								  <label class="form-check-label">SNS</label>
+								</div>
+			 				</div>
+			 				<div class="col"></div>
+			 			</div>
+			 			
+			 			<div class="row mt-2"><!-- 여백 -->
+			 			</div>
+			 			
+			 			<div class="row mt-5"> <!-- 회원가입 버튼 -->
+			 				<div class="col"></div>
+							<div class="col-4">
+								<div class="d-grid">
+									<button class="btn btn-dark" th:onclick="|joinMemberValidCheck(event)|">회원가입</button>
+								</div>
+							</div>
+							<div class="col"></div>
+						</div>
+						
+						
+					 </form>
+		 			
+		 			
+		 			<div class="row" style="padding:100px;"><!-- 여백 --></div>
+		 			
+		 			
+		 		</div>
+		 		
+		 		<div class="col"></div> <!-- 오른쪽 여백 -->
+		 		
+		 	</div>
+			
+			
+			
+			<div class="row" style="padding:100px;"><!-- 여백 --></div>
+			
+		</div>
+	</div>
+	
+	
+	
+	<th:block th:include="commons/footer"></th:block>
+  </div> 
+</div>  
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>

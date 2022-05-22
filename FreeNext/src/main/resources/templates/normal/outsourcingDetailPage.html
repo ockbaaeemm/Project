@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="utf-8">
+<link
+	href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+	rel="stylesheet"
+	integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+	crossorigin="anonymous">
+<link th:href="@{/css/commons.css}" rel="stylesheet">
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+<script src="https://code.jquery.com/jquery-3.6.0.js"
+	integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+	crossorigin="anonymous"></script>
+<title>IT아웃소싱 페이지</title>
+
+<script th:inline="javascript">
+  function openDetail(){
+	  /*<![CDATA[*/
+		  var url = /*[[ ${data.projectBoardVo.project_url} ]]*/;			  
+		  /*]]*/
+	  
+    var project_url = window.open(url,'_blank');
+    
+  }
+  
+
+	
+
+
+
+function doScrap(){
+	
+	//var data =$('#input').val();
+	
+
+	 var project_no= /*[[ ${data.projectBoardVo.project_no} ]]*/;		
+	  
+	  
+
+	  
+	 //var starBox = document.getElementById("starBox");    
+	 //starBox.onclick=function(){doScrap();}
+
+ $.ajax({
+        url: "./doScrap",
+        data: "project_no="+project_no,
+        type:"POST",
+        dataType:"JSON",
+        error:function(){
+        	alert('서버와의 통신에 문제가 발생했습니다');
+        },
+        success: function(data){
+          if(data.result== "error"){
+                alert(data.reason);
+			}
+           else{
+        	   getMyScrapState();
+
+			}
+		}
+});
+}	
+
+
+function getMyScrapState(){
+	var project_no= /*[[ ${data.projectBoardVo.project_no} ]]*/;	
+	
+	$.ajax({
+		url: "./getMyScrapState",
+        data: "project_no="+project_no,
+        type:"get",
+        dataType:"JSON",	
+        success : function(data){
+        	if(data.result== "error"){
+        		alert(data.reason);
+        	}else{
+        		if(data.state =="scrap"){
+                    $("#starBox ").attr("class","bi bi-star-fill");
+                    $("#starBox").css("color","yellow");                    
+                }
+                else if (data.state =="unscrap"){
+                    $("#starBox ").attr("class","bi bi-star");
+                    $("#starBox").css("color","black");
+                }       		
+        	}
+        }
+	});
+	
+}
+
+
+  
+</script>
+
+</head>
+<body>
+	<div style="margin: 0 auto;">
+		<div class="container-fluid">
+			<th:block th:include="commons/normal_navbar"></th:block>
+
+			<!-- 여기에 작성해주세요-->
+			<div style="width: 800px; margin: 0 auto">
+				<div class="container-fluid">
+
+					<div class="row">
+						<h4 class="text-center"
+							th:if="${data.recruitTypeCategoryVo.recruitType_no ==1}">프리랜서
+							매칭</h4>
+						<h4 class="text-center"
+							th:if="${data.recruitTypeCategoryVo.recruitType_no ==2}">IT아웃소싱</h4>
+					</div>
+					<div class="row mt-5"></div>
+
+					<div class="row" style="border-top: 1px solid gray">
+						<div class="col-auto" th:if="${session.sessionUser != null}"><!-- 로그인 했는지 확인 -->
+							<input type="hidden" name="project_no" th:value="${data.projectBoardVo.project_no}">
+							<div class="col-auto" th:if="${myScrapCount>0}">
+								<i id="starBox" class="bi bi-star-fill" style="color: yellow;" th:onclick="doScrap()"></i>
+							</div>
+							<div class="col-auto" th:unless="${myScrapCount>0}">
+								<i id="starBox" class="bi bi-star" th:onclick="doScrap()"></i>
+							</div>
+						</div>
+
+						<div class="col-10">
+							<div class="row">
+								<div class="col-9">
+									<p class="fw-bold"
+										th:text="${data.cooperationCategoryVo.cooperation_name}"></p>
+								</div>
+								<div class="col" style="padding: 0">
+									<span class="badge bg-danger"
+										th:if="${data.projectBoardVo.project_state=='Y'}">모집 중</span>
+								</div>
+								<div class="col" style="padding: 0">
+									<span class="badge bg-danger"
+										th:if="${data.projectBoardVo.project_state=='N'}">마감</span>
+								</div>
+								<!-- <div class="col-2 bg-secondary text-white" ><p th:text="${data.jobCategoryVo.job_name}"></p> </div> -->
+							</div>
+							<div class="row mt">
+								<div class="col-9">
+									<h4 class="fw-bold"
+										th:text="[+${data.workTypeCategoryVo.workType_name}+]+${data.projectBoardVo.project_name}"></h4>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+					<div class="row align-items-end mt-3"
+						style="border-top: 1px solid gray">
+						<div class="col text-center">예상 금액</div>
+						<div class="col text-center">예상 기간</div>
+						<div class="col text-center">위치</div>
+					</div>
+					<div class="row align-items-end mt-3">
+						<div class="col text-center">
+							<span
+								th:if="${#strings.isEmpty(data.projectBoardVo.project_price)}"
+								th:text="'-'"></span> <span
+								th:unless="${#strings.isEmpty(data.projectBoardVo.project_price)}"
+								th:text="${data.projectBoardVo.project_price}"></span>
+
+
+						</div>
+						<div class="col text-center">
+							<span
+								th:if="${#strings.isEmpty(data.projectBoardVo.project_period)}"
+								th:text="'-'"></span> <span
+								th:unless="${#strings.isEmpty(data.projectBoardVo.project_period)}"
+								th:text="${data.projectBoardVo.project_period}"></span>
+						</div>
+						<div class="col text-center">
+							<span
+								th:if="${#strings.isEmpty(data.localCategoryVo)}"
+								th:text="'-'"></span> <span
+								th:unless="${#strings.isEmpty(data.localCategoryVo)}"
+								th:text="${data.localCategoryVo.local_name}"></span>
+						</div>
+					</div>
+
+
+					<div class="row mb-5">
+						<button type="button" class="btn btn-outline-secondary"
+							th:onclick="openDetail()">프로젝트 상세보기</button>
+						<!-- th:onclick="'location.href=\''+ @{${data.projectBoardVo.project_url}} + '\''" >프로젝트 상세보기 -->
+
+					</div>
+					<div class="row mb-5">
+						<div class="col" th:utext="${data.projectBoardVo.project_content}"></div>
+					</div>
+					<!-- <div class="row" th:if="${not #strings.isEmpty(session.sessionUser)}">
+						<div class="col">
+							Email: <a href="mailto:﻿${session.sessionUser.member_email}"
+								th:text="${session.sessionUser.member_email}"></a>
+						</div>
+
+					</div> -->
+					<div class="row " style="border-top: 1px solid gray">
+						<div class="col"></div>
+						<div class="col"></div>
+						<div class="col col-auto text-right"
+							th:text="${#dates.format(data.projectBoardVo.project_date, 'yyyy-MM-dd ')}"></div>
+
+					</div>
+					<div class="row mb-5">
+						<div class="d-grid gap-2 col-6 mx-auto">
+
+							<button onclick="location.href = document.referrer;" class="btn btn-secondary"
+								type="button">목록으로</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+
+			<th:block th:include="commons/footer"></th:block>
+		</div>
+	</div>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+		crossorigin="anonymous"></script>
+</body>
+</html>

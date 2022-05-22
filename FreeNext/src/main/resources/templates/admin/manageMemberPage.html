@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link th:href="@{/css/commons.css}" rel="stylesheet">
+
+ <title>회원관리 리스트</title>    
+</head>
+<body>
+<div style="margin:0 auto;">
+  <div class="container-fluid">
+    <th:block th:include="commons/admin_navbar"></th:block>
+
+    <div class="row">
+        <div class="col">
+            <!-- 여기에 작성해주세요-->            
+                  <form action="./manageMemberPage" method="get">
+                  <div class="row mt-3">
+                      <div class="col-1">| 검색조건</div> 
+                      <div class="col">
+                          
+                          <select name="searchOption" class="form-select">                             
+                              <option th:selected="${#strings.isEmpty(searchData.searchOption) || searchData.searchOption =='all'}" value="all">전체</option>
+                              <option th:selected="${searchData.searchOption =='id'}" value="id">아이디</option>
+                              <option th:selected="${searchData.searchOption =='name'}" value="name">이름</option>
+                          </select>
+                      
+                      </div>
+                      <div class="col-8">
+                          <input name="searchWord" type="text" class="form-control" th:value="${searchData.searchWord}">
+                      </div>
+                      <div class="col d-grid">
+                          <input type="submit" value="검색" class="btn btn-dark">
+                      </div>
+                  </div>
+
+                  <div class="row mt-3">
+                  	<div class="col-1">| 승인여부</div>
+                    <div class="col-7">
+		                <input type="radio" name="searchApproval" th:checked="${#strings.isEmpty(searchData.searchApproval) || searchData.searchApproval ==''}" value="" th:text="전체">
+		                <input type="radio" name="searchApproval" th:checked="${searchData.searchApproval == 'Y'}" value="Y" th:text="승인완료">
+		                <input type="radio" name="searchApproval" th:checked="${searchData.searchApproval == 'N'}" value="N" th:text="미승인">		                		                		                		                
+		            </div>
+		            <div class="col"></div>
+                  </div>
+                  
+                  <div class="row mt-3">
+                  	<div class="col-1">| 구분</div>                    
+                    <div class="col-7">                        		                
+		                <input type="radio" name="searchMemberType" th:checked="${#strings.isEmpty(searchData.searchMemberType) || searchData.searchMemberType ==''}" value="" th:text="전체">
+		                <input type="radio" name="searchMemberType" th:checked="${searchData.searchMemberType =='N'}" value="N" th:text="일반회원">
+		                <input type="radio" name="searchMemberType" th:checked="${searchData.searchMemberType =='B'}" value="B" th:text="기업회원">	         
+                    </div>
+
+                  </div>
+                  </form><br>
+            	<div class="row mt-1">
+            		<div class="col-1">| 전체 : [[${countT}]]</div>
+            		<div class="col-1">일반회원 : [[${countN}]] </div>
+            		<div class="col-1">기업회원 : [[${countC}]]</div>
+            	</div>
+
+				<div class="row mt-3">
+					<div class="col">
+		                <table class="table table-striped">
+		                    <thead>
+		                      <tr>
+		                        <th>NO</th>
+		                        <th>구분</th>
+		                        <th>이름/기업명</th>
+		                        <th>아이디</th>
+		                        <th>승인여부</th>
+		                        <th>전화번호</th>
+		                        <th>이메일</th>
+		                      </tr>
+		                    </thead> 		                    
+		                        <tr th:each="memberList : ${memberList}">
+		                          <td th:text="${memberList.member_no}"></td>
+		                          <td th:if="${memberList.member_type == 'N'}">일반회원</td>
+		                          <td th:if="${memberList.member_type == 'B'}">기업회원</td>
+		                          <td th:text="${memberList.member_name}"></td>
+		                          <td>
+	                          		<a th:text="${memberList.member_id}" th:href="@{|/admin/updateMemberPage?${additionalParam}&member_no=${memberList.member_no}|}"></a>
+		                          </td>
+		                          <td th:if="${memberList.member_approval == 'Y'}">완료</td>
+		                          <td th:if="${memberList.member_approval == 'N'}">승인대기</td>
+		                          <td th:text="${memberList.member_phone}"></td>
+		                          <td th:text="${memberList.member_email}"></td>
+		                          
+		                        </tr>
+		                  </table>					
+					</div>
+				</div>
+
+                  
+	        <div class="form-group row">
+	        	<div class="col"></div>
+	            <div class="col-sm-offset-2 col-sm-10 text-lg-end text-center">
+	                <a href="./updateMemberPage"><input type="button" class="btn btn-dark" value="등록" onclick="CheckAddProduct()"></a>
+	            </div>
+	        </div>
+	        <div class="row mt-1">
+				<div class="col-5"></div>
+				<div class="col">
+					<nav aria-label="...">
+						<ul class="pagination">
+						
+						<li th:if ="${startPage <= 1}" class="page-item disabled">
+								<a class="page-link">&lt;</a>
+						</li>
+						
+						<li th:unless ="${startPage <= 1}" class="page-item">
+								<a class="page-link" href="'./manageMemberPage?' + ${additionalParam} + '&pageNum='+${startPage-1 }">&lt;</a>
+						</li>
+						
+						<li th:each = "i : ${#numbers.sequence(startPage,endPage)}" class="page-item" th:classappend="${currentPage} == ${i} ? active">
+								<a class="page-link" th:href="'./manageMemberPage?' + ${additionalParam} + '&pageNum=' + ${i}" th:text="${i}"></a>
+						</li>
+
+						   
+						<li th:if="${endPage >= totalPageCount}" class="page-item disabled">
+								<a class="page-link">&gt;</a>
+						</li>
+						<li th:unless ="${endPage >= totalPageCount}" class="page-item">
+								<a class="page-link" href="'./manageMemberPage?' + ${additionalParam} + '&pageNum=' + ${endPage+1 }">&gt;</a>
+						</li>							    
+							    
+						</ul>
+					</nav>							
+				</div>
+
+			</div>
+	        
+        </div>
+    </div>
+
+    <th:block th:include="commons/footer"></th:block>
+  </div> 
+</div>  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>

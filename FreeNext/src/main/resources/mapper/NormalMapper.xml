@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teamb.freenext.normal.mapper.NormalMapper">
+
+	<!-- 메인페이지에 보여질 최근 16개 프로젝트 가져오기 -->
+	<select id="selectLatestProjectList" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+		select * from FN_ProjectBoard
+		order by project_date desc
+		limit 0, 15
+	</select>
+
+	<!-- 프로젝트의 잡카테고리(ex.프로그래머, 디자인, 기획,..) 가져오기 -->	
+	<select id="selectJobCategoryByProjectNo" resultType="com.teamb.freenext.vo.JobCategoryVo">
+		select jc.*
+		from FN_Job_Category jc, FN_Project_Job pj
+		where jc.job_no = pj.job_no
+		and pj.project_no = #{project_no}	
+	</select>
+	
+	<!-- 프로젝트를 등록한 업체 종류(ex.개별등록, 디자인그룹나인, 위시캣, 웹크루트,...) 가져오기 -->
+	<select id="selectCooperationCategoryByProjectNo" resultType="com.teamb.freenext.vo.CooperationCategoryVo">
+		select cc.*
+		from FN_ProjectBoard pb, FN_Cooperation_Category cc
+		where pb.cooperation_no = cc.cooperation_no
+		and pb.project_no = #{project_no}	
+	</select>
+	
+	<!-- 프리랜서 매칭, IT아웃소싱 상세 페이지 -->
+	<select id="getProjectDetailPageByNo" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+		select * 
+		from FN_ProjectBoard 
+		where project_no=#{project_no}	
+	</select>
+	
+	<!-- 스크랩 하기 -->
+	<insert id="doScrap">
+		insert into FN_MyScrap(project_no,member_no,scrap_date) 
+	    values(
+	    #{project_no},
+	    #{member_no},
+	    now()
+	    )
+	</insert>	
+	
+	<!-- 스크랩 취소 -->
+	<delete id="deleteScrap">
+		delete from FN_MyScrap
+		where project_no =#{project_no}
+		and member_no =#{member_no}
+	</delete>	
+	
+	<!-- 특정 프로젝트의 총 스크랩 수 -->
+	<select id="getTotalScrapCount" resultType="int">
+		SELECT COUNT(*)  
+		FROM FN_MyScrap 
+		WHERE project_no =#{project_no}	
+	</select>
+	
+	<!-- 내가 스크랩 했는지-->
+	<select id="getMyScrapCount" resultType="int">
+		SELECT COUNT(*) 
+		FROM FN_MyScrap 
+		WHERE project_no =#{project_no} AND member_no = #{member_no}
+	</select>
+	
+	<!-- 마이 스크랩 리스트 -->
+	<select id="getMyScrapList" resultType="com.teamb.freenext.vo.MyScrapVo">
+		SELECT * FROM FN_MyScrap
+	    WHERE member_no = #{member_no}
+	    ORDER BY scrap_no desc
+	</select>
+	
+	<select id="getMyScrapListOrderByRegistDate" resultType="com.teamb.freenext.vo.MyScrapVo">
+		select *
+		from fn_myscrap
+		where member_no = #{member_no}
+		order by project_no desc		
+	</select>	
+	
+	<!-- 마이스크랩 리스트에서 스크랩 삭제 -->
+	<select id="deleteMyScrapByList">
+		delete from FN_MyScrap
+	    where scrap_no=#{scrap_no}
+	</select>	
+	
+	<!-- 직종명 가져오기
+	<select id="getJobNameByNo" resultType="com.teamb.freenext.vo.JobCategoryVo">
+		select jc.*
+		from FN_Job_Category as jc ,FN_Project_Job as pj
+		where pj.project_no = #{project_no} and jc.job_no = pj.job_no
+	</select> -->
+	
+	<!-- 지역 가져오기 -->
+	<select id="getLocalByNo" resultType="com.teamb.freenext.vo.LocalCategoryVo">
+		select lc.*
+		from FN_Local_Category as lc, FN_Project_Local as pl
+		where  pl.project_no =#{project_no} and lc.local_no = pl.local_no
+	</select>
+	
+	<!-- 회원 정보 가져오기 -->
+	<select id="getMemberByNo" resultType="com.teamb.freenext.vo.MemberVo">
+		select * from FN_Member where member_no = #{member_no}
+	</select>
+	
+	<!-- 모집형태 가져오기 -->
+	<select id="getRecruitTypeByNo" resultType="com.teamb.freenext.vo.RecruitTypeCategoryVo">
+		select * from FN_RecruitType_Category where recruitType_no=#{recruitType_no}
+	</select>
+	
+	<!-- 근무 형태 가져오기 -->
+	<select id="getWorkTypeByNo" resultType="com.teamb.freenext.vo.WorkTypeCategoryVo">
+		select * from FN_WorkType_Category where workType_no=#{workType_no}
+	</select>
+	
+	<!-- 협력사 가져오기 -->
+	<select id="getCooperationByNo" resultType="com.teamb.freenext.vo.CooperationCategoryVo">
+		select * from FN_Cooperation_Category where cooperation_no=#{cooperation_no}
+	</select>
+	
+	<!-- 프로젝트 리스트 가져오기 
+	<select id="getProjectBoardList" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+		select * 
+		from FN_ProjectBoard		
+		<if test="recruitType_no != 0">
+			where recruitType_no = #{recruitType_no}
+		</if> 
+		order by project_no desc
+	</select> -->
+	
+	<!-- 프로젝트 리스트 가져오기 
+	<select id="getProjectBoardList" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+				select * from (
+					SELECT (@ROWNUM:=@ROWNUM+1) rnum, r1.*
+					FROM (
+						select * 
+						from FN_ProjectBoard
+							<choose>
+								<when test="recruitType_no != 0">
+									where recruitType_no = #{recruitType_no}
+									<if test='project_state == "Y"'>
+										and project_state = 'Y'
+									</if>
+								</when>
+								<when test='project_state == "Y"'>
+									where project_state = 'Y'
+								</when>
+							</choose>
+						order by project_no desc
+					) r1, (SELECT @ROWNUM:=0) R
+					where 1=1
+					order by project_no desc
+					)list
+				<![CDATA[
+				where rnum >= (#{pageNum}-1)*10 + 1 
+				and rnum <= #{pageNum}*10
+				]]>
+	</select> -->
+	
+	<!-- 프로젝트 리스트 가져오기 -->
+	<select id="getProjectBoardList" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+				select * from (
+					SELECT (@ROWNUM:=@ROWNUM+1) rnum, r1.*
+					FROM (
+						select * 
+						from (
+      						select pb.*, pj.job_no,pj.job_name 
+							from FN_ProjectBoard pb 
+							left join (
+								select pj.*,jc.job_name 
+								from FN_Job_Category jc, FN_Project_Job pj
+								where jc.job_no = pj.job_no
+							) pj 
+							on pb.project_no = pj.project_no
+     	 						<choose>
+     	 							<when test="job_no==1">
+     	 								where pj.job_no=1
+     	 							</when>
+     	 							<when test="job_no==2">
+     	 								where pj.job_no=2
+     	 							</when>
+     	 							<when test="job_no==3">
+     	 								where pj.job_no=3
+     	 							</when>
+     	 							<when test="job_no==4">
+     	 								where pj.job_no=4
+     	 							</when>
+     	 							<when test="job_no==5">
+     	 								where pj.job_no=5
+     	 							</when>
+     	 							<when test="job_no==6">
+     	 								where pj.job_no=6
+     	 							</when>
+     	 						</choose>
+      							) a
+							<choose>
+								<when test="recruitType_no==1">
+									where a.recruitType_no=1
+								</when>
+								<when test="recruitType_no==2">
+									where a.recruitType_no=2 
+								</when>
+							</choose>
+							<choose>
+								<when test='recruitType_no ==0 and project_state == "Y"'>
+									where a.project_state = 'Y'
+								</when>
+								<when test='project_state == "Y"'>
+									and a.project_state = 'Y'
+								</when>
+							</choose>
+						order by a.project_no desc
+					) r1, (SELECT @ROWNUM:=0) R
+					where 1=1
+					order by project_no desc
+					)list
+				<![CDATA[
+				where rnum >= (#{pageNum}-1)*10 + 1 
+				and rnum <= #{pageNum}*10
+				]]>
+	</select>		
+	
+	<select id="selectSubAdProjectList" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+		select pb.*
+		from FN_ProjectBoard pb, FN_Ad ad
+		where pb.project_no = ad.project_no
+		and datediff(ad.ad_endDate, now()) > 0
+	</select>
+	
+	<!--  <select id="getProjectBoardCount" resultType="int">
+		select count(*)  from FN_ProjectBoard
+		<choose>
+			<when test="recruitType_no != 0">
+				where recruitType_no = #{recruitType_no}
+				<if test='project_state == "Y"'>
+					and project_state = 'Y'
+				</if>
+			</when>
+			<when test='project_state == "Y"'>
+				where project_state = 'Y'
+			</when>
+		</choose>
+	</select> -->
+	
+	<select id="getProjectBoardCount" resultType="int">
+		select count(*)  from (
+							select pb.*, pj.job_no,pj.job_name 
+							from FN_ProjectBoard pb 
+							left join (
+									select pj.*,jc.job_name 
+									from FN_Job_Category jc, FN_Project_Job pj
+									where jc.job_no = pj.job_no
+									) pj 
+							on pb.project_no = pj.project_no
+							<choose>
+     	 							<when test="job_no==1">
+     	 								where pj.job_no=1
+     	 							</when>
+     	 							<when test="job_no==2">
+     	 								where pj.job_no=2
+     	 							</when>
+     	 							<when test="job_no==3">
+     	 								where pj.job_no=3
+     	 							</when>
+     	 							<when test="job_no==4">
+     	 								where pj.job_no=4
+     	 							</when>
+     	 							<when test="job_no==5">
+     	 								where pj.job_no=5
+     	 							</when>
+     	 							<when test="job_no==6">
+     	 								where pj.job_no=6
+     	 							</when>
+     	 						</choose>
+							)a
+				<choose>
+					<when test="recruitType_no==1">
+						where recruitType_no=1	
+					</when>
+					<when test="recruitType_no==2">
+						where recruitType_no=2	
+					</when>
+				</choose>
+				<choose>
+					<when test='recruitType_no ==0 and project_state == "Y"'>
+						where project_state = 'Y'
+					</when>
+					<when test='project_state == "Y"'>
+						and project_state = 'Y'
+					</when>
+			 	</choose>
+	</select>
+	
+	<select id="getHotBoardList" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+	select * 
+	from (
+	   SELECT (@ROWNUM:=@ROWNUM+1) rnum, r1.*
+	   FROM (
+	      select * 
+	      from (
+	      	select pb.*, pj.job_no,pj.job_name 
+			from FN_ProjectBoard pb 
+			left join (
+				select pj.*,jc.job_name 
+				from FN_Job_Category jc, FN_Project_Job pj
+				where jc.job_no = pj.job_no
+				) pj 
+			on pb.project_no = pj.project_no
+			<choose>
+     	 		<when test="job_no==1">
+     	 			where pj.job_no=1
+     	 		</when>
+     	 		<when test="job_no==2">
+     	 			where pj.job_no=2
+     	 		</when>
+     	 		<when test="job_no==3">
+     	 			where pj.job_no=3
+     	 		</when>
+     	 		<when test="job_no==4">
+     	 			where pj.job_no=4
+     	 		</when>
+     	 		<when test="job_no==5">
+     	 			where pj.job_no=5
+     	 		</when>
+     	 		<when test="job_no==6">
+     	 			where pj.job_no=6
+     	 		</when>
+     	 	</choose>
+	      ) a
+	      where cooperation_no=1 and project_state='Y'
+	      <choose>
+				<when test="recruitType_no==1">
+					and recruitType_no=1	
+				</when>
+				<when test="recruitType_no==2">
+					and recruitType_no=2	
+				</when>
+		</choose>
+	      order by a.project_no desc
+	      ) r1,
+	      (SELECT @ROWNUM:=0) R
+	   where 1=1
+	   order by project_no desc
+	   )list
+	   <![CDATA[
+	where rnum <4
+		]]>
+	</select>
+	
+	<select id="getMainBoardList" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+	select * 
+	from (
+	   SELECT (@ROWNUM:=@ROWNUM+1) rnum, r1.*
+	   FROM (
+	      select * 
+	      from (
+	      	select pb.*, pj.job_no,pj.job_name 
+			from FN_ProjectBoard pb 
+			left join (
+				select pj.*,jc.job_name 
+				from FN_Job_Category jc, FN_Project_Job pj
+				where jc.job_no = pj.job_no
+				) pj 
+			on pb.project_no = pj.project_no
+			<choose>
+     	 		<when test="job_no==1">
+     	 			where pj.job_no=1
+     	 		</when>
+     	 		<when test="job_no==2">
+     	 			where pj.job_no=2
+     	 		</when>
+     	 		<when test="job_no==3">
+     	 			where pj.job_no=3
+     	 		</when>
+     	 		<when test="job_no==4">
+     	 			where pj.job_no=4
+     	 		</when>
+     	 		<when test="job_no==5">
+     	 			where pj.job_no=5
+     	 		</when>
+     	 		<when test="job_no==6">
+     	 			where pj.job_no=6
+     	 		</when>
+     	 	</choose>
+	      ) a
+	      where cooperation_no !=1 and project_state='Y'
+	      <choose>
+				<when test="recruitType_no==1">
+					and recruitType_no=1	
+				</when>
+				<when test="recruitType_no==2">
+					and recruitType_no=2	
+				</when>
+		</choose>
+	      order by a.project_no desc
+	      ) r1,
+	      (SELECT @ROWNUM:=0) R
+	   where 1=1
+	   order by project_no desc
+	   )list
+	   <![CDATA[
+	where rnum <4
+		]]>		
+	</select>
+</mapper>

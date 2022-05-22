@@ -1,0 +1,39 @@
+    <div class="row">
+        <div class="col">
+            <nav class="py-2 bg-light border-bottom">
+                <div class="container d-flex flex-wrap">
+                  <ul class="nav me-auto">
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                    <li></li>
+                  </ul>
+                  <ul class="nav">
+                    <li class="nav-item nav-link link-dark px-2" th:if="${not #strings.isEmpty(session.sessionUser)}" th:text="${session.sessionUser.member_name} + ' 님'"></li>
+                    <li class="nav-item"><a href="../member/loginPage" class="nav-link link-dark px-2" th:if="${#strings.isEmpty(session.sessionUser)}">Login</a></li>
+                    <li class="nav-item"><a href="../member/logoutProcess" class="nav-link link-dark px-2" th:unless="${#strings.isEmpty(session.sessionUser)}">Logout</a></li>
+                    <li class="nav-item"><a href="../member/memberDuplicationCheckPage" class="nav-link link-dark px-2" th:if="${#strings.isEmpty(session.sessionUser)}">Sign up</a></li>
+                    <li class="nav-item"><a href="#" class="nav-link link-dark px-2">고객센터</a></li>
+                  </ul>
+                </div>
+              </nav>
+              <header class="py-3 mb-4 border-bottom">
+                <div class="container d-flex flex-wrap justify-content-center">
+                  <a href="../normal/main" class="d-flex align-items-center mb-3 mb-lg-0 me-lg-auto text-dark text-decoration-none">
+                    <img class="img-fluid" src="../img/freenext_logo.png">
+                  </a>
+                  <ul class="nav me-auto">                    
+                    <li class="nav-item"><a href="../normal/projectListPage" class="nav-link link-dark px-2">프로젝트</a></li>                    
+                    <li class="nav-item"><a href="#" class="nav-link link-dark px-2">공유오피스</a></li>                    
+                    <li class="nav-item"><a href="#" class="nav-link link-dark px-2">지식하우</a></li>                    
+                    <li class="nav-item"><a href="#" class="nav-link link-dark px-2">서비스안내</a></li>                    
+                    <li class="nav-item"><a href="../normal/myBoxPage" class="nav-link link-dark px-2">MYBOX</a></li>
+                  </ul>
+                  <ul class="nav me-auto">
+                    <li class="nav-item"><a href="../biz/main"><button type="button" class="btn btn-dark">기업서비스</button></a></li>
+                  </ul>      
+                </div>
+              </header>
+        </div>
+    </div>

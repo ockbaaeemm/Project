@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.teamb.shareoffice.member.mapper.MemberMapperJs">
+
+	<select id="getMessageList" resultType="com.teamb.shareoffice.vo.MessageVo">
+	
+		select sms.* 
+		from  SO_Message sms
+		where  sms.receive_no = #{no}
+		order by message_no desc	
+<!-- 	
+		select smb.member_nick,sms.* 
+		from  so_member smb, SO_Message sms
+		where smb.member_no = sms.sender_no and sms.receive_no = #{no}
+		order by message_no desc
+ -->		
+	</select>
+	
+	<select id="getSendMessageList" resultType="com.teamb.shareoffice.vo.MessageVo">
+		select rm.member_nick,rms.*
+		from so_member rm , so_message rms
+		where rm.member_no = rms.receive_no and rms.sender_no = #{no}
+		order by message_no desc
+	</select>
+	
+	<select id="getMemberByNo" resultType="com.teamb.shareoffice.vo.MemberVo">
+		SELECT * 
+		FROM so_member 
+		WHERE MEMBER_NO = #{no}
+	</select>
+	
+	<insert id="insertMessage">
+		insert into SO_Message(
+			sender_no,
+			receive_no,
+			txt,
+			read_date 
+		) values (
+			#{sender_no},
+			#{receive_no},
+			#{txt},
+			null
+		);
+	</insert>
+	
+	<select id="getSenderNo" resultType="com.teamb.shareoffice.vo.MessageVo">
+		select smb.member_nick,sms.* 
+		from  so_member smb, SO_Message sms
+		where smb.member_no = sms.sender_no 
+		and sms.sender_no= #{no}
+		limit 1
+	</select>
+	
+	<select id="getMemberByNick" resultType="com.teamb.shareoffice.vo.MemberVo">
+		select * 
+		from so_member 
+		where member_nick = #{nick}
+	</select>
+	
+	<update id="updateDate">
+		update so_Message 
+		set read_date = now() 
+		where read_date is null and receive_no = #{no}
+	</update>
+	
+	<select id="newMessageCount" resultType="int">
+		SELECT COUNT(CASE WHEN read_date IS NULL THEN 'NULL' ELSE read_date END)
+		FROM so_message 
+		WHERE read_date IS null and receive_no = #{no}
+	</select>
+	
+	<delete id="deleteReceiveMessage">
+		DELETE FROM so_message 
+		WHERE receive_no = #{receive_no} 
+		and message_no = #{message_no}
+	</delete>
+	
+	<delete id="deleteSendMessage">
+		DELETE FROM so_message 
+		WHERE sender_no = #{sender_no} 
+		and message_no = #{message_no}
+	</delete>
+	
+</mapper>

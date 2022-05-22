@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script th:inline="javascript">
+
+	/*<![CDATA[*/
+	var referer = /*[[ ${referer} ]]*/;
+	/*]]*/
+
+	alert("[로그인 실패] 이메일 인증후 로그인 바랍니다.");
+	document.location.href="./loginPage"
+</script>
+</head>
+<body>
+
+</body>
+</html>

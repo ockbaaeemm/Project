@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	<link th:href="@{/css/commons.css}" rel="stylesheet">
+    
+    <script th:inline="javascript">
+		function createJobOption(selectBox) {
+			
+			var jobCategoryBox = document.querySelector("#jobCategory");
+			
+			/*<![CDATA[*/
+			var jobCategoryList = /*[[ ${jobCategoryList} ]]*/;
+			/*]]*/
+
+			if(selectBox.value == 1) {
+				jobCategoryBox.disabled = false;
+				
+				for(var jobCategory of jobCategoryList) {
+					var option = document.createElement("option");
+					option.innerText = jobCategory.job_name;
+					option.value = jobCategory.job_no;
+					
+					jobCategoryBox.appendChild(option);
+				}
+				
+			}else {
+				for(var option of jobCategoryBox.querySelectorAll("option")) {
+					if(option.id != "invalidJob") {
+						option.remove();
+					}
+					jobCategoryBox.disabled = true;
+				}		
+				return;	
+			}
+		}    
+		
+		function sendData() {
+			var frm = document.querySelector("form");
+			
+			var nameBox = document.querySelector("#nameBox");
+			if(nameBox.value == "") {
+				alert("프로젝트 제목을 입력해주세요");
+				nameBox.focus();
+				return;
+			}
+			
+			/*<![CDATA[*/
+			var old_recruitType_no = /*[[ ${data.projectBoardVo.recruitType_no} ]]*/;			  
+			/*]]*/
+			
+			var recruitType_box = document.getElementsByName("recruitType_no")[0];
+			var doJobBox = document.querySelector("#doJobBox");
+			
+			if(recruitType_box.value == 0) {
+				alert("프로젝트 분야를 선택해주세요");
+				return;
+			} else if(recruitType_box.value == 1 && old_recruitType_no == 2) {
+				doJobBox.value = "I";
+			} else if(recruitType_box.value == 2 && old_recruitType_no == 1) {
+				doJobBox.value = "D";
+			} else {
+				doJobBox.value = "U";				
+			}
+			
+			if(recruitType_box.value == 1 && document.querySelector("#jobCategory").value == 0) {
+				alert("2차 구분을 선택해주세요");
+				return;
+			}
+			
+			var localBox = document.querySelector("#localBox");
+			if(localBox.value == 0) {
+				alert("지역을 선택해주세요");
+				localBox.focus();				
+				return;
+			}
+			
+			var today = new Date();
+			var start_date = document.querySelector("#start_date").value;
+			var end_date = document.querySelector("#end_date").value;			
+			
+			if(new Date(start_date) >  new Date(end_date)) {
+				alert("시작일이 마감일보다 클 수 없습니다")
+				return;
+			}			
+			
+			if(today > new Date(end_date)) {
+				alert("마감일은 오늘 날짜보다 커야합니다");
+				return;
+			}
+			
+			document.querySelector("#period").value = start_date + "~" + end_date;
+			
+			var priceBox = document.querySelector("#priceBox");
+			
+			if(priceBox.value == "") {
+				alert("비용을 입력해주세요(만원 단위)");
+				priceBox.focus();
+				return;
+			}
+			
+			var workTypeBox = document.querySelector("#workTypeBox");
+			if(workTypeBox.value == 0) {
+				alert("근무형태를 선택해주세요");
+				workTypeBox.focus();
+				return;
+			}						
+			
+			 var contentBox = document.querySelector("#contentBox");
+			 if(contentBox.value == 0) {
+				 alert("내용을 입력해주세요");
+				 contentBox.focus();
+				 return;
+			 }
+			
+			frm.submit();			
+			
+		}
+		
+		window.addEventListener("DOMContentLoaded" , function(){
+			  /*<![CDATA[*/
+			  var project_period = /*[[ ${data.projectBoardVo.project_period} ]]*/;			  
+			  /*]]*/
+			
+			  var splitDate = project_period.split("~");
+			  
+			  var start_date = new Date(splitDate[0]);
+			  var end_date = new Date(splitDate[1]);
+			  
+			  const format_Date = (target)=>{
+				  	var month = target.getMonth() + 1;
+				  	var day = target.getDate();
+				  	
+				  	if(month < 10) {
+				  		month = "0" + month;
+				  	}
+				  	
+				  	if(day < 10) {
+				  		day = "0" + day;
+				  	}
+				    var formatted_Date = target.getFullYear() + "-" + month + "-" + day;
+				    
+				    return formatted_Date;
+				}	
+			  
+			  start_date = format_Date(start_date);
+			  end_date = format_Date(end_date);
+			  
+			  document.querySelector("#start_date").value = start_date;
+			  document.querySelector("#end_date").value = end_date;
+		});
+    </script>
+</head>
+<body>
+<div style="margin:0 auto;">
+  <div class="container-fluid">
+  
+    <th:block th:include="commons/biz_navbar"></th:block>
+
+
+    <form action="modifyProjectProcess" method="post">
+        <div class="row">
+        <!-- 여기부터 작성해주세요 -->
+        	<div class="col-3"></div>        	
+            <div class="col">
+                <div class="row mt-3">
+                    <div class="col" style="border-left:3px solid black;"><h3>프로젝트 수정</h3></div>
+                </div>
+                <div class="row mt-5">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-2">프로젝트명</div>
+                            <div class="col">
+                            	<input class="form-control" type="text" id="nameBox" th:value="${data.projectBoardVo.project_name}" name="project_name">
+                            	<input type="hidden" name="project_no" th:value="${data.projectBoardVo.project_no}">                            	
+                            </div>
+                            
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-2">분야</div>
+                            <div class="col">
+                                <select class="form-control" name="recruitType_no" onchange="createJobOption(this)" >
+                                    <option id="invalidRecruitType" value="0">구분선택</option>
+                                    <option th:each="recruitTypeCategory : ${recruitTypeCategoryList}"
+                                    	th:selected="${data.projectBoardVo.recruitType_no == recruitTypeCategory.recruitType_no}" th:value="${recruitTypeCategory.recruitType_no}"
+                                    	th:utext="${recruitTypeCategory.recruitType_name}"></option>
+                                </select>
+                            </div>
+                            <div class="col">
+                                <select th:if="${data.projectBoardVo.recruitType_no == 1}" name="job_no_list" class="form-control" id="jobCategory">
+                                	<option id="invalidJob" value="0" selected>2차구분 선택</option>
+                                	<option th:each="jobCategory : ${jobCategoryList}"
+                                		th:selected="${data.jobCategoryVo.job_no == jobCategory.job_no}" th:value="${jobCategory.job_no}"
+                                		th:utext="${jobCategory.job_name}"></option>
+                                </select>                                
+                                <select th:unless="${data.projectBoardVo.recruitType_no == 1}" name="job_no_list"  class="form-control" id="jobCategory" disabled>
+                                	<option id="invalidJob" value="0" selected>2차구분 선택</option>
+                                </select>
+                                <input type="hidden" id="doJobBox" name="doJob">
+                            </div>  				
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-2">지역</div>
+                            <div class="col">
+                                <select id="localBox" class="form-control" name="local_no_list">
+                                    <option id="invalidLocalType" selected value="0">지역선택</option>
+                                    <option th:each="localCategory : ${localCategoryList}"
+                                    	th:selected="${data.localCategoryVo.local_no == localCategory.local_no}"
+                                    	th:value="${localCategory.local_no}"
+                                    	th:utext="${localCategory.local_name}"></option>
+                                </select>
+                            </div>  				
+                        </div>                                                
+                        <div class="row mt-3">
+                            <div class="col-2">기간</div>
+                            <div class="col"><input class="form-control"id="start_date" type="date"></div>
+                            <div class="col-1 text-center">~</div>
+                            <div class="col"><input class="form-control" id="end_date" type="date"></div>
+                            <div class="col-1">까지</div>
+                            <input id="period" type="hidden" name="project_period">
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-2">비용</div>
+                            <div class="col"><input id="priceBox" class="form-control" type="text" th:value="${data.projectBoardVo.project_price}" name="project_price"></div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-2">형태</div>
+                            <div class="col">
+                                <select id="workTypeBox" class="form-control" name="workType_no">
+                                    <option value="0">구분선택</option>                                   
+                                    <option th:each="workTypeCategory : ${workTypeCategoryList}"
+                                    	th:selected="${data.projectBoardVo.workType_no == workTypeCategory.workType_no}"
+                                    	th:value="${workTypeCategory.workType_no}"
+                                    	th:utext="${workTypeCategory.workType_name}"></option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                        	<div class="col">
+	                            <div class="row">
+                                    <div class="col-4">작성자</div>
+                                    <div class="col" th:text="${session.sessionBizUser.member_name}"></div>					
+	                            </div>
+	                        </div>
+	                        <div class="col">
+	                            <div class="row">
+                                    <div class="col-3">진행상태</div>
+                                    <div class="col-3">
+                                        <input type="radio" th:checked="${data.projectBoardVo.project_state == 'Y'}" name="project_state" value="Y">진행중  					
+                                    </div>
+                                    <div class="col-3">
+                                        <input type="radio" th:checked="${data.projectBoardVo.project_state == 'N'}" name="project_state" value="N">마감  					
+                                    </div>					
+	                            </div>
+	                        </div>  				
+                        </div>
+                        <div class="row mt-3">
+                        	<div class="col-2">광고신청</div>
+                        	<div class="col">
+                        		<th:block th:if="${#strings.isEmpty(adVo)}">
+                        			<input type="checkbox" name="subAd" value="Y">신청하기
+                        		</th:block>
+                        		<th:block th:unless="${#strings.isEmpty(adVo)}">
+                        			<span style="border: 1px solid black;">사용 중</span><span class="ms-5" th:text="${#dates.format(adVo.ad_endDate, 'yy-MM-dd')} + ' 만료'"></span>
+                        		</th:block>
+                        	</div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-2">내용</div>
+                            <div class="col">
+                                <textarea id="contentBox" class="form-control" rows=10 name="project_content" th:utext="${data.projectBoardVo.project_content}"></textarea>                                                                
+                                <input type="hidden" name="cooperation_no" value="1">
+                            </div>
+                        </div>  		  	
+                    </div>
+                </div>
+                <div class="row mt-5">
+                	<div class="col-8"></div>
+                    <div class="col d-grid"><button class="btn btn-dark" type="button" onclick="sendData()">수정</button></div>
+                    <div class="col d-grid"><button type="button" class="btn btn-outline-dark" th:onclick="|location.href='/biz/projectDetailPage?project_no=${data.projectBoardVo.project_no}'|">취소</button></div>
+                </div>
+            </div>
+            <div class="col-3"></div>
+        </div>
+        </form>            
+
+    <th:block th:include="commons/footer"></th:block>
+  </div> 
+</div>  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+
+<mapper namespace="com.teamb.freenext.admin.mapper.AdminMapper">
+
+
+<!-- 관리자 로그인 -->
+<select id="getAdminByIdAndPw" resultType="com.teamb.freenext.vo.AdminVo">
+	SELECT *
+	FROM FN_Admin
+	WHERE admin_id = #{admin_id}
+	AND admin_pw = #{admin_pw}
+</select>
+
+<!-- 회원관리(리스트,수정) 관련 -->
+<select id="getMemberList" resultType="com.teamb.freenext.vo.MemberVo">
+SELECT * FROM FN_Member
+<choose>
+   <when test="searchWord != null">
+      <choose>
+         <when test='searchOption == "all"'>
+            where (member_id like CONCAT('%',#{searchWord},'%') or member_name like CONCAT('%',#{searchWord},'%'))
+         </when>
+         <when test='searchOption == "id"'>
+            where member_id like CONCAT('%',#{searchWord},'%')     
+         </when>
+         <when test='searchOption == "name"'>
+            where member_name like CONCAT('%',#{searchWord},'%')
+         </when>
+      </choose>
+      <if test="searchApproval !=null">
+            and member_approval = #{searchApproval} 
+      </if>
+      <if test="searchMemberType !=null">
+            and member_type = #{searchMemberType}
+      </if>
+   </when>
+   <when test="searchApproval != null and searchWord == null">
+         where member_approval = #{searchApproval}
+         <if test="searchMemberType != null">
+         	and member_type = #{searchMemberType}
+         </if>
+   </when>
+   <when test="searchMemberType != null and searchWord == null">
+         where member_type = #{searchMemberType}
+         <if test="searchApproval != null">
+         	and member_approval = #{searchApproval}
+         </if>         
+   </when>
+</choose>
+ORDER BY member_no DESC
+limit #{startNum}, 10
+</select>
+
+<!-- 
+<select id="getMemberCount" resultType="int">
+	SELECT COUNT(*) FROM FN_Member
+	<choose>
+		<when test="searchOption != null">
+			<choose>
+				<when test='searchOption == "all"'>
+					where member_id like '%' || #{searchWord} || '%' or member_name like '%' || #{searchWord} || '%'
+				</when>
+				<when test='searchOption == "id"'>
+					where member_id like '%' || #{searchWord} || '%'		
+				</when>
+				<when test='searchOption == "name"'>
+					where member_name like '%' || #{searchWord} || '%'
+				</when>
+			</choose>
+			<if test="searchApproval !=null">
+					and member_approval = #{searchApproval} 
+			</if>
+			<if test="searchMemberType !=null">
+					and member_type = #{searchMemberType}
+			</if>
+		</when>
+		<when test="searchApproval != null">
+				where member_approval = #{searchApproval}
+		</when>
+		<when test="searchMemberType != null">
+				where member_type = {searchMemberType}
+		</when>
+	</choose>		
+</select>  -->
+
+<select id="getCommonMemberByNo" resultType="com.teamb.freenext.vo.MemberVo">
+	SELECT * FROM FN_Member WHERE member_no= #{no}
+</select>
+
+<select id="getMemberCustomerByNo" resultType="com.teamb.freenext.vo.MemberCustomerVo">
+	SELECT * FROM FN_Member_Customer WHERE member_no= #{no}
+</select>
+
+<select id="getMemberCompanyByNo" resultType="com.teamb.freenext.vo.MemberCompanyVo">
+	SELECT * FROM FN_Member_Company WHERE member_no= #{no}
+</select>
+
+<update id="updateCommonMember">
+	UPDATE FN_Member 
+	SET member_pw = #{member_pw}, member_name= #{member_name}, 
+	member_phone =#{member_phone}, member_email = #{member_email}, member_profile= #{member_profile}, member_approval=#{member_approval},
+	member_address = #{member_address}
+	WHERE member_no= #{member_no}
+</update>
+
+<update id="updateMemberCustomer">
+	UPDATE FN_Member_Customer 
+	SET customer_birth = #{customer_birth}, customer_number = #{customer_number},
+	customer_agree_email = #{customer_agree_email}, customer_agree_sns = #{customer_agree_sns}
+	WHERE member_no= #{member_no}
+</update>
+
+<update id="updateMemberCompany">
+	UPDATE FN_Member_Company 
+	SET company_manager=#{company_manager}, company_license_number=#{company_license_number}, 
+		company_license_img=#{company_license_img}, company_fax=#{company_fax}
+	WHERE member_no= #{member_no}
+</update>
+
+<!-- 회원 수 조회 관련 -->
+<select id="getTotalNumber" resultType="int">
+ 	SELECT count(*) FROM FN_Member
+	<choose>
+	   <when test="searchWord != null">
+	      <choose>
+	         <when test='searchOption == "all"'>
+	            where (member_id like CONCAT('%',#{searchWord},'%') or member_name like CONCAT('%',#{searchWord},'%'))
+	         </when>
+	         <when test='searchOption == "id"'>
+	            where member_id like CONCAT('%',#{searchWord},'%')     
+	         </when>
+	         <when test='searchOption == "name"'>
+	            where member_name like CONCAT('%',#{searchWord},'%')
+	         </when>
+	      </choose>
+	      <if test="searchApproval !=null">
+	            and member_approval = #{searchApproval} 
+	      </if>
+	      <if test="searchMemberType !=null">
+	            and member_type = #{searchMemberType}
+	      </if>
+	   </when>
+	   <when test="searchApproval != null and searchWord == null">
+	         where member_approval = #{searchApproval}
+	         <if test="searchMemberType != null">
+	         	and member_type = #{searchMemberType}
+	         </if>
+	   </when>
+	   <when test="searchMemberType != null and searchWord == null">
+	         where member_type = #{searchMemberType}
+	         <if test="searchApproval != null">
+	         	and member_approval = #{searchApproval}
+	         </if>         
+	   </when>
+	</choose> 	
+</select>
+
+<select id="getTotalMemberTypeNumber" resultType="int">
+	SELECT count(*) FROM FN_Member
+	where member_type = #{member_type}
+
+   <if test="searchWord != null">
+      <choose>
+         <when test='searchOption == "all"'>
+            and (member_id like CONCAT('%',#{searchWord},'%') or member_name like CONCAT('%',#{searchWord},'%'))
+         </when>
+         <when test='searchOption == "id"'>
+            and member_id like CONCAT('%',#{searchWord},'%')     
+         </when>
+         <when test='searchOption == "name"'>
+            and member_name like CONCAT('%',#{searchWord},'%')
+         </when>
+      </choose>
+	</if>      
+    <if test="searchApproval !=null">
+    	and member_approval = #{searchApproval} 
+    </if>   	
+</select>
+
+<select id="getTotalCompany" resultType="int">
+	SELECT count(*) FROM FN_Member, FN_Member_Company
+</select>
+
+</mapper>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<script th:inline="javascript">
+	/*<![CDATA[*/
+	var response_code = /*[[ ${response_code} ]]*/;
+	/*]]*/
+
+	window.close();
+	
+	window.addEventListener('unload', function() {
+		window.opener.sendMeData(response_code);
+	});
+</script>
+</head>
+<body>
+</body>
+</html>

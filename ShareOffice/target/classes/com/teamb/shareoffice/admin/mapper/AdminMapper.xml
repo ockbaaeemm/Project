@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teamb.shareoffice.admin.mapper.AdminMapper">
+
+<select id="getAdminPw" resultType="com.teamb.shareoffice.vo.AdminVo">
+	SELECT *
+	FROM SO_Admin
+	WHERE admin_pw = #{admin_pw}
+</select>
+
+<select id="hostSessionRenewal" resultType="com.teamb.shareoffice.vo.MemberVo">
+	SELECT * FROM SO_Member
+	where member_no = #{member_no}
+</select>
+
+<select id="getGuestInformation" resultType="com.teamb.shareoffice.vo.MemberVo">
+	SELECT * FROM SO_Member 
+		<choose>
+			<when test="searchOption == 'number'">
+				WHERE member_no = #{searchStr}
+			</when>
+			<when test="searchOption == 'nickname'">
+				WHERE member_nick LIKE CONCAT('%', #{searchStr}, '%')
+			</when>
+			<when test="searchOption == 'id'">
+				WHERE member_id LIKE CONCAT('%', #{searchStr}, '%')
+			</when>
+		</choose>
+	order by member_no desc
+</select>
+
+<delete id="deleteGuest">
+		delete from SO_Member
+		where member_no = #{member_no}
+</delete>
+
+
+<select id="getHostInformation" resultType="com.teamb.shareoffice.vo.HostVo">
+	SELECT * FROM SO_Host 
+		<choose>
+			<when test="searchOption == 'number'">
+				WHERE host_no = #{searchStr}
+			</when>
+			<when test="searchOption == 'name'">
+				WHERE host_name LIKE CONCAT('%', #{searchStr}, '%')
+			</when>
+			<when test="searchOption == 'id'">
+				WHERE host_owner LIKE CONCAT('%', #{searchStr}, '%')
+			</when>
+			<when test="searchOption == 'approve'">
+				WHERE host_approve LIKE CONCAT('%', #{searchStr}, '%')
+			</when>
+		</choose>
+	order by host_no desc
+</select>
+
+<select id="hostRefuseDetail" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+	SELECT * FROM SO_OfficeInfo
+	order by office_approve_date desc
+</select>
+
+<select id="getCheckApplyHostList" resultType="com.teamb.shareoffice.vo.HostVo">
+	SELECT * FROM SO_Host
+	where host_approve = 'P'
+</select>
+
+<update id="updateMemberType">
+	UPDATE SO_Member
+	SET member_type = #{member_type}
+	where member_no = #{member_no}
+</update>
+
+<update id="hostApplyGuest">
+	UPDATE SO_Host
+	SET host_approve = 'Y', host_approve_date = now()
+	where host_no = #{host_no}
+</update>
+
+<update id="hostRefuseGuest">
+	UPDATE SO_Host
+	SET host_approve = 'N', host_approve_comment = #{refuseReason}, host_approve_date = now()
+	where host_no = #{host_no}
+</update>
+
+<update id="updateOfficeApprove">
+	UPDATE SO_Officeinfo
+	SET office_approve = 'N', office_approve_comment = null, office_approve_date = null
+	WHERE member_no = #{member_no}
+</update>
+
+<update id="deleteOfficeByHostRefuse">
+	update so_officeinfo
+	SET office_approve = 'N', office_approve_comment = '호스트 권한 해제', office_approve_date = now()
+	where member_no = #{member_no}
+</update>
+
+<select id="getOfficeInformation" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+	SELECT * FROM SO_OfficeInfo
+		<choose>
+			<when test="searchOption == 'number'">
+				WHERE office_no = #{searchStr}
+			</when>
+			<when test="searchOption == 'officename'">
+				WHERE office_name LIKE CONCAT('%', #{searchStr}, '%')
+			</when>
+			<when test="searchOption == 'approve'">
+				WHERE office_approve LIKE CONCAT('%', #{searchStr}, '%')
+			</when>
+		</choose>
+	order by office_no desc
+</select>
+
+<select id="officeDetail" resultType="com.teamb.shareoffice.vo.OfficeInfoVo">
+	SELECT * FROM SO_OfficeInfo
+	where office_approve = 'P'
+</select>
+
+<select id="getAdminByNo" resultType="com.teamb.shareoffice.vo.AdminVo">
+	SELECT * 
+	FROM SO_Admin
+	WHERE admin_no = #{admin_no}
+</select>
+
+<update id="officeApply">
+	UPDATE SO_OfficeInfo
+	SET office_approve = 'Y', office_approve_date = now()
+	where office_no = #{office_no} AND member_no = #{member_no}
+</update>
+
+<update id="officeRefuse">
+	UPDATE SO_OfficeInfo
+	SET office_approve = 'N', office_approve_comment = #{refuseReason}, office_approve_date = now()
+	where office_no = #{office_no} AND member_no = #{member_no}
+</update>
+
+<select id="getImageDetail" resultType="com.teamb.shareoffice.vo.ImageDetailVo">
+	SELECT * FROM SO_ImageDetail
+	where office_no = #{office_no}
+</select>
+
+
+</mapper>

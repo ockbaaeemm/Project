@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.teamb.freenext.biz.mapper.BizMapper">
+
+	<select id="selectJobCategory" resultType="com.teamb.freenext.vo.JobCategoryVo">
+		select * from FN_Job_Category
+	</select>
+	
+	<select id="selectWorkTypeCategory" resultType="com.teamb.freenext.vo.WorkTypeCategoryVo">
+		select * from FN_WorkType_Category
+	</select>
+	
+	<select id="selectRecruitTypeCategory" resultType="com.teamb.freenext.vo.RecruitTypeCategoryVo">
+		select * from FN_RecruitType_Category
+	</select>
+	
+	<insert id="insertProject">
+		insert into FN_ProjectBoard
+			(member_no, workType_no, recruitType_no, cooperation_no, project_name,
+			project_period, project_price, project_state, project_content, project_url,
+			project_date, project_key)
+		values (
+			#{member_no},
+			#{workType_no},
+			#{recruitType_no},
+			#{cooperation_no},
+			#{project_name},
+			#{project_period},
+			#{project_price},
+			#{project_state},
+			#{project_content},
+			#{project_url},
+			NOW(),
+			#{project_key}
+		)
+	</insert>	
+	
+	<insert id="insertProjectJob">
+		insert into FN_Project_Job (job_no, project_no)
+		values (
+			#{job_no},
+			#{project_no}
+		)	
+	</insert>
+	
+	<insert id="insertProjectLocal">
+		insert into FN_Project_Local (local_no, project_no)
+		values (
+			#{local_no},
+			#{project_no}
+		)	
+	</insert>
+	
+	<select id="selectProjectListByMemberNo" resultType="com.teamb.freenext.vo.ProjectBoardVo">
+		select * 
+		from FN_ProjectBoard
+		where member_no = #{member_no}
+		<choose>
+			<when test='searchOption == "all"'>
+				AND (project_name LIKE CONCAT('%',#{searchKeyword},'%') or project_price LIKE CONCAT('%',#{searchKeyword},'%'))				
+			</when>
+			<when test='searchOption == "project"'>
+				AND project_name LIKE CONCAT('%',#{searchKeyword},'%')
+			</when>
+			<when test='searchOption == "price"'>
+				AND project_price LIKE CONCAT('%',#{searchKeyword},'%')
+			</when>
+		</choose>
+		<if test="groupOne != 0">
+			and recruitType_no = #{groupOne}			
+		</if>
+		<if test="groupOne == 1 and groupTwo != 0">
+			and project_no in (
+				select fj.project_no 
+				from fn_project_job fj
+				where fj.job_no = #{groupTwo}
+			)			
+		</if>
+		<if test='state_cdT != "all"'>
+			and project_state = #{state_cdT}
+		</if>		
+		order by project_no desc
+		limit #{startNum}, 10	
+	</select>
+	
+	<select id="selectProjectListCountByMemberNo" resultType="int">
+		select COUNT(*) 
+		from FN_ProjectBoard
+		where member_no = #{member_no}
+		<choose>
+			<when test='searchOption == "all"'>
+				AND (project_name LIKE CONCAT('%',#{searchKeyword},'%') or project_price LIKE CONCAT('%',#{searchKeyword},'%'))				
+			</when>
+			<when test='searchOption == "project"'>
+				AND project_name LIKE CONCAT('%',#{searchKeyword},'%')
+			</when>
+			<when test='searchOption == "price"'>
+				AND project_price LIKE CONCAT('%',#{searchKeyword},'%')
+			</when>
+		</choose>
+		<if test="groupOne != 0">
+			and recruitType_no = #{groupOne}			
+		</if>
+		<if test="groupOne == 1 and groupTwo != 0">
+			and project_no in (
+				select fj.project_no 
+				from fn_project_job fj
+				where fj.job_no = #{groupTwo}
+			)			
+		</if>
+		<if test='state_cdT != "all"'>
+			and project_state = #{state_cdT}
+		</if>
+	</select>	
+	
+	<insert id="insertAd">
+		insert into FN_Ad (project_no, ad_endDate)
+		values (#{project_no}, #{ad_endDate})	
+	</insert>
+	
+	<delete id="deleteProject">
+		delete from FN_ProjectBoard
+		where project_no = #{project_no}
+	</delete>
+	
+	<delete id="deleteProjectJob">
+		delete from FN_Project_Job
+		where project_no = #{project_no}
+	</delete>
+	
+	<delete id="deleteProjectLocal">
+		delete from FN_Project_Local
+		where project_no = #{project_no}
+	</delete>
+	
+	<delete id="deleteProjectAd">
+		delete from FN_Ad
+		where project_no = #{project_no}	
+	</delete>		
+	
+	<delete id="deleteProjectScrap">
+		delete from FN_MyScrap
+		where project_no = #{project_no}	
+	</delete>
+	
+	<select id="selectAdByProjectNo" resultType="com.teamb.freenext.vo.AdVo">
+		select *
+		from FN_Ad
+		where project_no = #{project_no}
+		<![CDATA[ 
+		and DATEDIFF(ad_endDate, now()) > 0
+		]]>	
+	</select>
+	
+	<update id="updateProject">
+		update FN_ProjectBoard
+		set workType_no = #{workType_no},
+		recruitType_no = #{recruitType_no}, 
+		project_name = #{project_name},
+		project_period = #{project_period},
+		project_price = #{project_price},
+		project_state = #{project_state},
+		project_content = #{project_content}
+		where project_no = #{project_no}
+	</update>
+	
+	<update id="updateProjectJob">
+		update fn_project_job set job_no = #{job_no}
+		where project_no = #{project_no}
+	</update>
+	
+	<update id="updateProjectLocal">
+		update fn_project_local set local_no = #{local_no}
+		where project_no = #{project_no}
+	</update>			
+</mapper>
